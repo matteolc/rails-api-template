@@ -7,7 +7,7 @@ class Api::V1::ErrorSerializer
     @status = status
     if errors.is_a? ActiveModel::Errors
       @errors = parse_am_errors(errors)
-    else #it's an array or a string
+    else 
       @errors = [errors].flatten
     end
   end

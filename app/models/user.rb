@@ -6,7 +6,6 @@ class User < ApplicationRecord
   include DeviseTokenAuth::Concerns::User
       
   rolify                     
-  has_many :roles, through: :users_roles
 
   def token_validation_response
   	{ id: id, username: username, roles: roles.map(&:name) }.as_json  	
