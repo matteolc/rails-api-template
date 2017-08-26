@@ -296,6 +296,10 @@ end
 empty_directory 'db/seeds'
 copy_from_repo "db/seeds/users.rb"
 
+admin_secret = ask("Choose a password for the admin user:")
+user_secret = ask("Choose a password for the user user:")
+
+create_file ".env", "ADMIN_SECRET=#{admin_secret}\nUSER_SECRET=#{user_secret}"
 run "bundle exec rake db:seed:users"
 
 ##########################
