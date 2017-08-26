@@ -1,13 +1,11 @@
 class Api::V1::ApiController < ActionController::API
   	
-	include Pundit
-	include FlexiblePermissions
-	include ActiveHashRelation
-    #requires monkeyparched scopes, optional if you don't enable them
-    ActiveHashRelation.initialize! 	
-	include HttpAcceptLanguage::AutoLocale 					 
-	include DeviseTokenAuth::Concerns::SetUserByToken
-	
+    include Pundit
+    include FlexiblePermissions
+    include ActiveHashRelation
+    include DeviseTokenAuth::Concerns::SetUserByToken
+    
+    before_action :set_locale
     before_action :authenticate_api_user!, except: :options  
     
     rescue_from ActiveRecord::RecordNotFound do
@@ -38,6 +36,10 @@ class Api::V1::ApiController < ActionController::API
   
     protected
     
+    def set_locale
+      I18n.locale = http_accept_language.compatible_language_from(I18n.available_locales) || I18n.default_locale
+    end    
+    
     def invalid_request!
         api_error status: :bad_request,
      	          errors:  I18n.t('errors.messages.bad_request')
@@ -52,11 +54,26 @@ class Api::V1::ApiController < ActionController::API
       resource = resource.per(params[:per_page]) if params[:per_page]      
       return resource      
     end
+
+    def paginate_array(array)
+      array = Kaminari.paginate_array(array).page(params[:page] || 1)
+      array = array.per(params[:per_page]) if params[:per_page]      
+      return array            
+    end     
     
     def search(resource)
     	apply_filters(!params[:q] || params[:q].empty? ? resource.all : resource.search(params[:q]), JSON.parse(params[:filters]))
     end    
 
+    def set_time_window
+      if params[:filters].present?
+        filters = JSON.parse(params[:filters])
+      	between_times = filters["date_time"] || filters["start_stamp"]
+   	    @from_date =  between_times && between_times["geq"]  
+  	    @to_date = between_times && between_times["leq"]
+  	  end
+    end
+        
     # expects paginated resource!
     def meta_attributes(resource, extra_meta = {})
       meta = {
@@ -66,7 +83,6 @@ class Api::V1::ApiController < ActionController::API
         total_pages: resource.total_pages,
         total_count: resource.total_count
       }.merge(extra_meta)
-
       return meta
     end   
     

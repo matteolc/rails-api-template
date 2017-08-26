@@ -10,3 +10,6 @@ ActiveHashRelation.configure do |config|
   config.filter_active_record_scopes = true
 end
 
+#requires monkeyparched scopes, optional if you don't enable them
+ActiveHashRelation.initialize!
+
