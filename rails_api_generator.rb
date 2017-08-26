@@ -59,42 +59,25 @@ gem 'chronic'
 gem 'by_star', git: 'git://github.com/radar/by_star'
 gem 'groupdate'
 gem 'rubyzip'
-gem 'net-ssh'
-gem 'net-sftp'
-gem 'net-telnet'
 gem 'devise_token_auth'
 gem 'pundit'
 gem 'rolify'
 gem 'flexible_permissions'
-gem 'distribution', '~>0.7.3'
 gem 'active_model_serializers', github: 'rails-api/active_model_serializers'
 gem 'kaminari'
-gem 'acts-as-taggable-on', '~> 4.0'
-gem 'ancestry'
-gem 'rufus-scheduler'
-gem 'unicorn'
-gem 'unicorn-worker-killer'
 gem 'sidekiq'
+gem 'rufus-scheduler'
 gem 'daemons'
-gem 'griddler'
-gem 'griddler-sendgrid'
 gem 'money'
 gem 'money-rails', '~>1'
 gem 'calculate-all'
-gem 'usagewatch_ext'
 gem 'active_hash_relation', github: 'kollegorna/active_hash_relation'
 gem 'pg_search'
 gem 'http_accept_language'
-gem 'roo'
-gem 'roo-xls'
 gem 'rubyzip'
 gem 'countries'
-gem 'wicked_pdf'
-gem 'wkhtmltopdf-binary'
-gem 'wkhtmltopdf-heroku'
 gem 'rails-i18n', '~> 5.0.0'
-gem 'rollbar'
-gem "paperclip", git: "git://github.com/thoughtbot/paperclip.git"
+gem 'puma_worker_killer'
 
 append_to_file "Gemfile", "\nruby '2.3.3'"
 run 'bundle install'
@@ -133,11 +116,12 @@ end
 ##########################
 ### DATABASE
 ##########################
-db_secret = ask("What is the database root password?")
+db_user = ask("What is the database user?")
+db_secret = ask("What is the database password?")
 db_secret = "" if db_secret.blank?    
 prepend_to_file 'config/database.yml' do
 "local: &local
-  username: dba
+  username: #{db_user}
   password: #{db_secret}
   host: localhost\n"
 end
@@ -167,6 +151,7 @@ run "bundle exec rake db:migrate"
 
 comment_lines 'config/application.rb', /require "action_view\/railtie"/
 comment_lines 'config/application.rb', /require "sprockets\/railtie"/
+comment_lines 'config/application.rb', /require "action_cable\/engine"/
 
 ### CORS
 application "
@@ -184,13 +169,11 @@ application "
 ### APPLICATION
 application "config.active_record.default_timezone = :utc"
 application "config.i18n.default_locale = :en"
+application "config.i18n.available_locales = %w(en)"
 application "config.active_job.queue_adapter = :sidekiq"
 
-### MIME TYPES
-append_to_file 'config/initializers/mime_types.rb', 'Mime::Type.register_alias "text/excel", :xls'
-
 ### INITIALIZERS
-%w(active_hash_relation active_model_serializers ancestry money redis rollbar devise devise_token_auth kaminari scheduler).each do |initializer|
+%w(active_hash_relation active_model_serializers money redis rollbar devise devise_token_auth kaminari).each do |initializer|
   copy_from_repo "config/initializers/#{initializer}.rb"
 end
 copy_from_repo "config/sidekiq.yml"
@@ -208,8 +191,8 @@ application(nil, env: "production") do
     address: 'smtp.sendgrid.net',
     port: 587,
     enable_starttls_auto: true,
-    user_name: ENV['MANDRILL_ACCOUNT'],
-    password: ENV['MANDRILL_ACCOUNT_KEY'],
+    user_name: ENV['SENDGRID_ACCOUNT'],
+    password: ENV['SENDGRID_KEY'],
     domain: ENV['FQDN'],
     authentication: 'plain'
   } "
@@ -223,12 +206,9 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
 
   namespace :api do     
     mount_devise_token_auth_for 'User', at: 'auth', skip: [:omniauth_callbacks]
-  	namespace :v1 do
+
+    namespace :v1 do      
   		resources :users, only: [:index, :show, :update, :create, :destroy]
-  		namespace :spreadsheet do
-  			post 'upload'
-  			get 'download'
-  		end	
   	end
   end"
 end
@@ -240,27 +220,45 @@ rakefile("auto_annotate_models.rake") do <<-'TASK'
 if Rails.env.development?
   task :set_annotation_options do
     Annotate.set_defaults({
-      'position_in_routes'   => "before",
-      'position_in_class'    => "before",
-      'position_in_test'     => "before",
-      'position_in_fixture'  => "before",
-      'position_in_factory'  => "before",
-      'show_indexes'         => "true",
-      'simple_indexes'       => "false",
-      'model_dir'            => "app/models",
-      'include_version'      => "false",
-      'require'              => "",
-      'exclude_tests'        => "false",
-      'exclude_fixtures'     => "false",
-      'exclude_factories'    => "false",
-      'ignore_model_sub_dir' => "false",
-      'skip_on_db_migrate'   => "false",
-      'format_bare'          => "true",
-      'format_rdoc'          => "false",
-      'format_markdown'      => "false",
-      'sort'                 => "false",
-      'force'                => "false",
-      'trace'                => "false",
+      'routes'                    => 'false',
+      'position_in_routes'        => 'before',
+      'position_in_class'         => 'before',
+      'position_in_test'          => 'before',
+      'position_in_fixture'       => 'before',
+      'position_in_factory'       => 'before',
+      'position_in_serializer'    => 'before',
+      'show_foreign_keys'         => 'true',
+      'show_complete_foreign_keys' => 'false',
+      'show_indexes'              => 'true',
+      'simple_indexes'            => 'false',
+      'model_dir'                 => 'app/models',
+      'root_dir'                  => '',
+      'include_version'           => 'false',
+      'require'                   => '',
+      'exclude_tests'             => 'true',
+      'exclude_fixtures'          => 'true',
+      'exclude_factories'         => 'true',
+      'exclude_serializers'       => 'false',
+      'exclude_scaffolds'         => 'true',
+      'exclude_controllers'       => 'true',
+      'exclude_helpers'           => 'true',
+      'exclude_sti_subclasses'    => 'false',
+      'ignore_model_sub_dir'      => 'false',
+      'ignore_columns'            => nil,
+      'ignore_routes'             => nil,
+      'ignore_unknown_models'     => 'false',
+      'hide_limit_column_types'   => '<%= AnnotateModels::NO_LIMIT_COL_TYPES.join(",") %>',
+      'hide_default_column_types' => '<%= AnnotateModels::NO_DEFAULT_COL_TYPES.join(",") %>',
+      'skip_on_db_migrate'        => 'false',
+      'format_bare'               => 'true',
+      'format_rdoc'               => 'false',
+      'format_markdown'           => 'true',
+      'sort'                      => 'false',
+      'force'                     => 'false',
+      'trace'                     => 'false',
+      'wrapper_open'              => nil,
+      'wrapper_close'             => nil,
+      'with_comment'              => true
     })
   end
 
@@ -268,11 +266,17 @@ if Rails.env.development?
   
   # Annotate models
   task :annotate do
-    puts 'Annotating models...'
+    puts 'Annotating models...'    
     system 'bundle exec annotate'
   end
   
-end   
+  # Annotate routes
+  task :annotate_routes do
+    puts 'Annotating models...'
+    system 'bundle exec annotate --routes'
+  end
+
+end    
 TASK
 end
 
@@ -312,16 +316,14 @@ copy_from_repo "db/seeds/users.rb"
 
 run "bundle exec rake db:seed:users"
 
-###
+##########################
 ### PATCHES
-###
+##########################
 comment_lines 'app/controllers/application_controller.rb', /protect_from_forgery with: :exception/
 
 ##########################
-### HEROKU
+### PROCFILE
 ##########################
-append_to_file 'Gemfile', "
-ruby '2.3.2'"
 create_file "Procfile", "web: bundle exec puma -C config/puma.rb"
 
 commit "Creation"
