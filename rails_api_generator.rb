@@ -130,18 +130,18 @@ run "bundle exec rake db:create"
 ##########################
 ### MIGRATIONS
 ##########################   
-%w(pg_extensions users roles).each do |migration|
+%w(pg_extensions users).each do |migration|
   copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true}
 end 
 
 run "bundle exec rake db:migrate"
 
+run "rails g rolify Role User"
+run "bundle exec rake db:migrate"
+
 ##########################
 ### CONFIGURATION
 ##########################
-
-comment_lines 'config/application.rb', /require "action_view\/railtie"/
-
 ### CORS
 application "
     config.middleware.insert_before 0, Rack::Cors do
@@ -195,7 +195,6 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
 
   namespace :api do     
     mount_devise_token_auth_for 'User', at: 'auth', skip: [:omniauth_callbacks]
-
     namespace :v1 do      
   		resources :users, only: [:index, :show, :update, :create, :destroy]
   	end
