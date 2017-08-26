@@ -296,10 +296,11 @@ end
 empty_directory 'db/seeds'
 copy_from_repo "db/seeds/users.rb"
 
+rollbar_token = ask("What is your Rollbar token? (empty for no token)")
 admin_secret = ask("Choose a password for the admin user:")
 user_secret = ask("Choose a password for the user user:")
 
-create_file ".env", "ADMIN_SECRET=#{admin_secret}\nUSER_SECRET=#{user_secret}"
+create_file ".env", "ROLLBAR_ACCESS_TOKEN=#{rollbar_token}\nADMIN_SECRET=#{admin_secret}\nUSER_SECRET=#{user_secret}"
 run "bundle exec rake db:seed:users"
 
 ##########################
