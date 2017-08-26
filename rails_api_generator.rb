@@ -26,8 +26,6 @@ end
 ##########################
 create_file '.ruby-version' do "2.3.3" end  
 gemset_name = ask("What is the name of the gemset?")
-gemset_name = "a-ruby-application" if gemset_name.blank?
-application_name = gemset_name
 create_file '.ruby-gemset' do "#{gemset_name}" end
 
 git :init
@@ -36,7 +34,6 @@ commit "Initial commit"
 ##########################
 ### GEMS
 ##########################
-
 gem 'dotenv-rails'
 gem 'annotate', group: :development
 gem 'awesome_print', group: [:development, :test]
@@ -130,13 +127,10 @@ run "bundle exec rake db:create"
 ##########################
 ### MIGRATIONS
 ##########################   
-%w(pg_extensions users).each do |migration|
+%w(pg_extensions users roles).each do |migration|
   copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true}
 end 
 
-run "bundle exec rake db:migrate"
-
-run "rails g rolify Role User"
 run "bundle exec rake db:migrate"
 
 ##########################
