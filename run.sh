@@ -19,3 +19,5 @@ rails new $APPNAME \
     --skip-javascript \
     --skip-turbolinks \
     --skip-bundle
+
+touch $APPNAME/.env    

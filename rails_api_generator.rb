@@ -170,7 +170,7 @@ copy_from_repo "config/puma.rb"
 
 ### PRODUCTION MAILER
 application(nil, env: "production") do
-  "config.action_mailer.default_url_options = { host: ENV['FQDN'] }
+  "config.action_mailer.default_url_options = { host: ENV['MAILER_DOMAIN'] }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
@@ -182,7 +182,7 @@ application(nil, env: "production") do
     enable_starttls_auto: true,
     user_name: ENV['SENDGRID_ACCOUNT'],
     password: ENV['SENDGRID_KEY'],
-    domain: ENV['FQDN'],
+    domain: ENV['MAILER_DOMAIN'],
     authentication: 'plain'
   } "
 end
