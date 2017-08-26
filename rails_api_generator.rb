@@ -25,16 +25,10 @@ end
 ### GEMSET
 ##########################
 create_file '.ruby-version' do "2.3.3" end  
-### rvm gemset create gemset_name
-### rvm gemset use gemset_name
-### gem install bundler --no-rdoc --no-ri
-### gem install rails --no-rdoc --no-ri
 gemset_name = ask("What is the name of the gemset?")
 gemset_name = "a-ruby-application" if gemset_name.blank?
 application_name = gemset_name
 create_file '.ruby-gemset' do "#{gemset_name}" end
-create_file '.nvm' do "7.9.0" end
-create_file '.nvmrc' do "7.9.0" end
 
 git :init
 commit "Initial commit"
@@ -125,12 +119,10 @@ prepend_to_file 'config/database.yml' do
   password: #{db_secret}
   host: localhost\n"
 end
-insert_into_file "config/database.yml", after: "development:\n" do 
+insert_into_file "config/database.yml", after: "<<: *default\n" do 
 "  <<: *local\n" 
 end
-insert_into_file "config/database.yml", after: "test:\n" do 
-"  <<: *local\n" 
-end
+run "bin/rails db:environment:set RAILS_ENV=development"
 run "bundle exec rake db:drop"
 run "bundle exec rake db:create"
 
@@ -148,8 +140,6 @@ run "bundle exec rake db:migrate"
 ##########################
 
 comment_lines 'config/application.rb', /require "action_view\/railtie"/
-comment_lines 'config/application.rb', /require "sprockets\/railtie"/
-comment_lines 'config/application.rb', /require "action_cable\/engine"/
 
 ### CORS
 application "
