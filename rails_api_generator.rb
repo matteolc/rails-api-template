@@ -126,12 +126,10 @@ prepend_to_file 'config/database.yml' do
   host: localhost\n"
 end
 insert_into_file "config/database.yml", after: "development:\n" do 
-" <<: *default
-  <<: *local\n" 
+"  <<: *local\n" 
 end
 insert_into_file "config/database.yml", after: "test:\n" do 
-"  <<: *default
-  <<: *local\n" 
+"  <<: *local\n" 
 end
 run "bundle exec rake db:drop"
 run "bundle exec rake db:create"
