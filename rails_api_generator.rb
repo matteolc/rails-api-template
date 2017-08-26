@@ -72,6 +72,7 @@ gem 'rubyzip'
 gem 'countries'
 gem 'rails-i18n', '~> 5.0.0'
 gem 'puma_worker_killer'
+gem 'rollbar'
 
 append_to_file "Gemfile", "\nruby '2.3.3'"
 run 'bundle install'
