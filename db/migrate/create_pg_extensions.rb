@@ -1,4 +1,4 @@
-class CreatePgExtensions < ActiveRecord::Migration[5.0]
+class CreatePgExtensions < ActiveRecord::Migration[5.1]
   def change
   	unless extension_enabled?('uuid-ossp')
       execute 'create extension "uuid-ossp"'
