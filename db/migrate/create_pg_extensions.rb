@@ -1,5 +1,9 @@
 class CreatePgExtensions < ActiveRecord::Migration[5.1]
   def change
+  	unless extension_enabled?('pgcrypto')
+      execute 'create extension "pgcrypto"'
+      enable_extension 'pgcrypto'
+    end    
   	unless extension_enabled?('uuid-ossp')
       execute 'create extension "uuid-ossp"'
       enable_extension 'uuid-ossp'
