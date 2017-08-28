@@ -21,13 +21,6 @@ def commit(msg)
   git commit: "-m '#{msg}'"	
 end
 
-##########################
-### GEMSET
-##########################
-create_file '.ruby-version' do "2.3.3" end  
-gemset_name = ask("What is the name of the gemset?")
-create_file '.ruby-gemset' do "#{gemset_name}" end
-
 git :init
 commit "Initial commit"
 
@@ -71,7 +64,6 @@ gem 'rails-i18n', '~> 5.0.0'
 gem 'puma_worker_killer'
 gem 'rollbar'
 
-append_to_file "Gemfile", "\nruby '2.3.3'"
 run 'bundle install'
 
 ##########################
@@ -108,19 +100,16 @@ end
 ##########################
 ### DATABASE
 ##########################
-db_user = ask("What is the database user?")
-db_secret = ask("What is the database password?")
-db_secret = "" if db_secret.blank?    
 prepend_to_file 'config/database.yml' do
 "local: &local
-  username: #{db_user}
-  password: #{db_secret}
-  host: localhost\n"
+  username: ENV['DB_USER']
+  password: ENV['DB_SECRET']
+  host: ENV['DB_HOST']\n"
 end
 insert_into_file "config/database.yml", after: "<<: *default\n" do 
 "  <<: *local\n" 
 end
-run "bin/rails db:environment:set RAILS_ENV=development"
+run "bin/rails db:environment:set RAILS_ENV=$RAILS_ENV"
 run "bundle exec rake db:drop"
 run "bundle exec rake db:create"
 
@@ -161,25 +150,6 @@ application "config.active_job.queue_adapter = :sidekiq"
 end
 copy_from_repo "config/sidekiq.yml"
 copy_from_repo "config/puma.rb"
-
-### PRODUCTION MAILER
-application(nil, env: "production") do
-  "config.action_mailer.default_url_options = { host: ENV['MAILER_DOMAIN'] }
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.perform_deliveries = true
-  config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.default :charset => 'utf-8'  
-
-  config.action_mailer.smtp_settings = {
-    address: 'smtp.sendgrid.net',
-    port: 587,
-    enable_starttls_auto: true,
-    user_name: ENV['SENDGRID_ACCOUNT'],
-    password: ENV['SENDGRID_KEY'],
-    domain: ENV['MAILER_DOMAIN'],
-    authentication: 'plain'
-  } "
-end
           
 ##########################
 ### ROUTES
@@ -295,18 +265,7 @@ end
 ##########################
 empty_directory 'db/seeds'
 copy_from_repo "db/seeds/users.rb"
-
-rollbar_token = ask("What is your Rollbar token? (empty for no token)")
-admin_secret = ask("Choose a password for the admin user:")
-user_secret = ask("Choose a password for the user user:")
-
-create_file ".env", "ROLLBAR_ACCESS_TOKEN=#{rollbar_token}\nADMIN_SECRET=#{admin_secret}\nUSER_SECRET=#{user_secret}"
 run "bundle exec rake db:seed:users"
-
-##########################
-### PATCHES
-##########################
-comment_lines 'app/controllers/application_controller.rb', /protect_from_forgery with: :exception/
 
 ##########################
 ### PROCFILE
