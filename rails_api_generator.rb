@@ -104,7 +104,7 @@ prepend_to_file 'config/database.yml' do
 "local: &local
   username: <%= ENV['DB_USER'] %>
   password: <%= ENV['DB_SECRET'] %>
-  host: <%= ENV['DB_HOST']
+  host: <%= ENV['DB_HOST'] %>
 "
 end
 insert_into_file "config/database.yml", after: "<<: *default\n" do 
