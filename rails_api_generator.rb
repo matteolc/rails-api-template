@@ -109,9 +109,6 @@ end
 insert_into_file "config/database.yml", after: "<<: *default\n" do 
 "  <<: *local\n" 
 end
-run "bin/rails db:environment:set RAILS_ENV=$RAILS_ENV"
-run "bundle exec rake db:drop"
-run "bundle exec rake db:create"
 
 ##########################
 ### MIGRATIONS
@@ -119,8 +116,6 @@ run "bundle exec rake db:create"
 %w(pg_extensions users roles).each do |migration|
   copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true}
 end 
-
-run "bundle exec rake db:migrate"
 
 ##########################
 ### CONFIGURATION
@@ -156,7 +151,6 @@ copy_from_repo "config/puma.rb"
 ##########################
 
 insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do "
-
   namespace :api do     
     mount_devise_token_auth_for 'User', at: 'auth', skip: [:omniauth_callbacks]
     namespace :v1 do      
@@ -234,17 +228,18 @@ end
 
 rakefile("app.rake") do <<-'TASK'    
   namespace :app do
-    task :reset => :environment do
+    task :bootstrap => :environment do
       Rake::Task['db:drop'].invoke
       Rake::Task['db:create'].invoke
       Rake::Task['db:migrate'].invoke
+      Rake::Task['db:seed:users'].invoke
     end
-    task :seed => :environment do      
-      Rake::Task['db:seed'].invoke
-    end   
  end    
 TASK
 end
+
+empty_directory 'db/seeds'
+copy_from_repo "db/seeds/users.rb"
 
 rakefile("custom_seed.rake") do <<-'TASK'  
 namespace :db do
@@ -259,13 +254,6 @@ namespace :db do
 end
 TASK
 end
-
-##########################
-### SEED
-##########################
-empty_directory 'db/seeds'
-copy_from_repo "db/seeds/users.rb"
-run "bundle exec rake db:seed:users"
 
 ##########################
 ### PROCFILE
