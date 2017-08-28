@@ -114,7 +114,7 @@ end
 ##########################
 ### MIGRATIONS
 ##########################   
-%w(pg_extensions users roles).each do |migration|
+%w(users roles).each do |migration|
   copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true}
 end 
 
