@@ -225,11 +225,35 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
   end"
 end
 
-
+# Example resources
+generate "model", "Author name:string"
+generate "model", "Post title:string body:text author_id:uuid published_at:datetime likes:integer published:boolean category:string"
+%w(author post).each do |resource|  # JSONAPI resources
+  copy_from_repo "app/resources/api/v1/#{resource}_resource.rb"
+end
+%w(author post).each do |policy|
+  copy_from_repo "app/policies/#{policy}_policy.rb"
+end
+insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do # Routes
+  "
+  jsonapi_resources :posts
+  jsonapi_resources :authors"
+end
 
 create_file "Procfile", "web: bundle exec puma -C config/puma.rb" # Procfile
 
 commit "Creation"
+
+create_file '.env' do
+  "DATABASE_USER=dba
+  DATABASE_PASSWORD=12345678
+  DATABASE_HOST=localhost
+  JWT_SECRET=secret
+  ROLLBAR_TOKEN=
+  MAILER_DOMAIN=
+  SENDGRID_ACCOUNT=
+  SENDGRID_KEY="
+end
 
 run 'bundle exec rake app:bootstrap'
 
