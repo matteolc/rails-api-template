@@ -4,7 +4,7 @@ def migration_ts
 end    
 	
 def copy_from_repo(filename, opts={})
-  repo = "https://raw.githubusercontent.com/matteolc/rails_api_template/master/"
+  repo = "https://raw.githubusercontent.com/matteolc/rails-api-template/master/"
   source_filename = filename
   destination_filename = filename  
   destination_filename  = destination_filename.gsub(/create/, "#{migration_ts.call}_create") if opts[:migration_ts]
@@ -12,7 +12,7 @@ def copy_from_repo(filename, opts={})
     remove_file destination_filename
     get repo + source_filename, destination_filename
   rescue OpenURI::HTTPError
-    say_wizard "Unable to obtain #{source_filename} from the repo #{repo}"
+    puts "Unable to obtain #{source_filename} from the repo #{repo}"
   end
 end
 
