@@ -24,145 +24,92 @@ end
 git :init
 commit "Initial commit"
 
-##########################
-### GEMS
-##########################
-gem 'dotenv-rails'
+# GEMS
 gem 'annotate', group: :development
-gem 'awesome_print', group: [:development, :test]
-gem 'faker'
-gem 'factory_girl_rails', group: [:development, :test]
-gem 'rspec-rails', group: [:development, :test] 
-gem 'rack-cors', :require => 'rack/cors'
+gem_group :development, :test do
+  gem 'awesome_print'
+  gem 'faker'
+  gem 'factory_girl_rails'
+  gem 'rspec-rails'
+end
+gem 'dotenv-rails'
 gem 'default_value_for'
-gem 'humanize'
-gem 'descriptive_statistics'
-gem 'time_difference'
-gem 'week_of_month'
 gem 'chronic'
-gem 'by_star', git: 'git://github.com/radar/by_star'
-gem 'groupdate'
-gem 'rubyzip'
-gem 'devise_token_auth'
-gem 'pundit'
-gem 'rolify'
-gem 'flexible_permissions'
-gem 'active_model_serializers', '~> 0.10.0'
-gem 'kaminari'
 gem 'sidekiq'
 gem 'rufus-scheduler'
 gem 'daemons'
-gem 'money'
-gem 'money-rails', '~>1'
-gem 'calculate-all'
-gem 'active_hash_relation', '~> 1.4.0'
-gem 'pg_search'
-gem 'http_accept_language'
-gem 'rubyzip'
-gem 'countries'
-gem 'rails-i18n', '~> 5.0.0'
-gem 'puma_worker_killer'
 gem 'rollbar'
+
+gem 'jsonapi-resources'
+gem 'pg_search'
+gem 'dotenv-rails'
+gem 'puma_worker_killer'
+gem 'pundit'
+gem 'jsonapi-authorization', git: 'https://github.com/venuu/jsonapi-authorization.git'
+gem 'rolify'
+gem 'jwt'
+
+# uncomment gem 'bcrypt'
+# uncomment gem 'rack-cors'
 
 run 'bundle install'
 
-##########################
-### MODELS
-##########################
-%w(user role).each do |model|  
+%w(user role json_web_token).each do |model|  # Models
   copy_from_repo "app/models/#{model}.rb"
 end
-
-##########################
-### CONTROLLERS
-##########################
-empty_directory 'app/controllers/api/v1'
-%w(api users).each do |controller|
+empty_directory 'app/models/concerns' 
+copy_from_repo 'app/models/concerns/has_secure_tokens.rb' # JWT
+empty_directory 'lib/templates/active_record/model' # Models template
+copy_from_repo "lib/templates/active_record/model/model.rb"
+empty_directory 'app/controllers/api/v1' # Controllers
+%w(api users registrations sessions).each do |controller|
   copy_from_repo "app/controllers/api/v1/#{controller}_controller.rb"
 end
-
-##########################
-### POLICIES
-##########################
-empty_directory 'app/policies'
+insert_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::API" do # Authorization
+  "
+  include Authorization"
+end
+empty_directory 'app/controllers/concerns' 
+copy_from_repo 'app/controllers/concerns/authorization.rb' # Authorization
+empty_directory 'app/policies' # Policies
 %w(application user).each do |policy|
   copy_from_repo "app/policies/#{policy}_policy.rb"
 end
-
-##########################
-### SERIALIZERS
-##########################
-empty_directory 'app/serializers/api/v1'
-%w(api error user).each do |serializer|
-  copy_from_repo "app/serializers/api/v1/#{serializer}_serializer.rb"
-end  
-
-##########################
-### DATABASE
-##########################
-prepend_to_file 'config/database.yml' do
-"local: &local
-  username: <%= ENV['DB_USER'] %>
-  password: <%= ENV['DB_SECRET'] %>
-  host: <%= ENV['DB_HOST'] %>
-"
-end
-insert_into_file "config/database.yml", after: "<<: *default\n" do 
-"  <<: *local\n" 
-end
-
-##########################
-### MIGRATIONS
-##########################   
-%w(users roles).each do |migration|
+%w(extensions users roles).each do |migration| # Migrations
   copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true}
 end 
-
-##########################
-### CONFIGURATION
-##########################
-### CORS
-application "
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        origins '*'
-        resource '*', 
-                 headers: :any, 
-                 methods: [:get, :post, :options, :delete, :put, :patch, :head],                
-                 expose: ['access-token', 'expiry', 'token-type', 'uid', 'client']
-      end
-    end
-"
-
-### APPLICATION
-application "config.active_record.default_timezone = :utc"
-application "config.i18n.default_locale = :en"
-application "config.i18n.available_locales = %w(en)"
-application "config.active_job.queue_adapter = :sidekiq"
-
-### INITIALIZERS
-%w(active_hash_relation active_model_serializers money redis rollbar devise devise_token_auth kaminari).each do |initializer|
+%w(redis rollbar cors generators jsonapi_resources).each do |initializer| # Initializers
   copy_from_repo "config/initializers/#{initializer}.rb"
 end
 copy_from_repo "config/sidekiq.yml"
 copy_from_repo "config/puma.rb"
-          
-##########################
-### ROUTES
-##########################
-
-insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do "
-  namespace :api do     
-    mount_devise_token_auth_for 'User', at: 'auth', skip: [:omniauth_callbacks]
-    namespace :v1 do      
-  		resources :users, only: [:index, :show, :update, :create, :destroy]
-  	end
+prepend_to_file 'config/database.yml' do # Db config
+  "local: &local
+    username: <%= ENV['DATABASE_USER'] %>
+    password: <%= ENV['DATABASE_PASSWORD'] %>
+    host: <%= ENV['DATABASE_HOST'] %>
+  "
+end
+insert_into_file "config/database.yml", after: "<<: *default\n" do 
+"  <<: *local\n" 
+end
+application "config.active_record.default_timezone = :utc" # Timezone
+application "config.active_job.queue_adapter = :sidekiq" # Job processor        
+insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do # Routes
+  "
+   namespace :api do
+    namespace :v1 do
+      post 'login', to: 'sessions#create'
+      delete 'logout', to: 'sessions#destroy'
+      post 'signup', to: 'registrations#create'
+      jsonapi_resources :accounts, only: [:show, :edit, :update]
+      jsonapi_resources :posts
+      jsonapi_resources :authors
+      jsonapi_resources :users
+    end
   end"
 end
-
-##########################
-### TASKS
-##########################
+# Rake tasks
 rakefile("auto_annotate_models.rake") do <<-'TASK'    
 if Rails.env.development?
   task :set_annotation_options do
@@ -229,16 +176,16 @@ end
 
 rakefile("app.rake") do <<-'TASK'    
   namespace :app do
-    task :bootstrap => :environment do
+    task :reset => :environment do
       Rake::Task['db:drop'].invoke
       Rake::Task['db:create'].invoke
       Rake::Task['db:migrate'].invoke
-      Rake::Task['db:seed:users'].invoke
     end
  end    
 TASK
 end
 
+# Db seeds
 empty_directory 'db/seeds'
 copy_from_repo "db/seeds/users.rb"
 
@@ -256,9 +203,10 @@ end
 TASK
 end
 
-##########################
-### PROCFILE
-##########################
+# Example resources
+generate "scaffold", "forums title:string description:text"
+
+# PROCFILE
 create_file "Procfile", "web: bundle exec puma -C config/puma.rb"
 
 commit "Creation"

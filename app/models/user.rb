@@ -1,14 +1,10 @@
-class User < ApplicationRecord
-	
-  devise :database_authenticatable, :authentication_keys => [:username]
-  devise :trackable
-         
-  include DeviseTokenAuth::Concerns::User
-      
-  rolify                     
+class User < ActiveRecord::Base
+  has_secure_password    
+  include HasSecureTokens
+  has_secure_tokens
+  rolify    
 
-  def token_validation_response
-  	{ id: id, username: username, roles: roles.map(&:name) }.as_json  	
-  end 
-  
+  validates_uniqueness_of :email,
+                          :username    
+ 
 end
