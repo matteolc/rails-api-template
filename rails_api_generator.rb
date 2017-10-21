@@ -48,9 +48,9 @@ gem 'pundit'
 gem 'jsonapi-authorization', git: 'https://github.com/venuu/jsonapi-authorization.git'
 gem 'rolify'
 gem 'jwt'
+gem 'bcrypt'
 
-# uncomment gem 'bcrypt'
-# uncomment gem 'rack-cors'
+gsub_file 'Gemfile', "#gem 'rack-cors'", "gem 'rack-cors'"
 
 run 'bundle install'
 
