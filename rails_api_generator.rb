@@ -48,10 +48,10 @@ gem 'pundit'
 gem 'jsonapi-authorization', git: 'https://github.com/venuu/jsonapi-authorization.git'
 gem 'rolify'
 gem 'jwt'
-gem 'bcrypt'
 
-gsub_file 'Gemfile', "#gem 'rack-cors'", "gem 'rack-cors'"
 
+gsub_file 'Gemfile', "# gem 'rack-cors'", "gem 'rack-cors'"
+gsub_file 'Gemfile', "# gem 'bcrypt', '~> 3.1.7'", "gem 'bcrypt', '~> 3.1.7'"
 run 'bundle install'
 
 %w(user role json_web_token).each do |model|  # Models
@@ -204,7 +204,7 @@ TASK
 end
 
 # Example resources
-generate "scaffold", "forums title:string description:text"
+generate "model", "Author name:string"
 
 # PROCFILE
 create_file "Procfile", "web: bundle exec puma -C config/puma.rb"
