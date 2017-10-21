@@ -189,7 +189,7 @@ end
 
 rakefile("app.rake") do <<-'TASK'    
   namespace :app do
-    task :bootstrap => :environment do
+    task :reset => :environment do
       Rake::Task['db:drop'].invoke
       Rake::Task['db:create'].invoke
       Rake::Task['db:migrate'].invoke
@@ -255,6 +255,10 @@ create_file '.env' do
   SENDGRID_KEY="
 end
 
-run 'bundle exec rake app:bootstrap'
+run 'bundle exec rake db:create'
+run 'bundle exec rake db:migrate'
+run 'bundle exec rake db:seed:users'
+
+commit "Bootstrap"
 
 
