@@ -189,7 +189,7 @@ end
 
 rakefile("app.rake") do <<-'TASK'    
   namespace :app do
-    task :reset => :environment do
+    task :bootstrap => :environment do
       Rake::Task['db:drop'].invoke
       Rake::Task['db:create'].invoke
       Rake::Task['db:migrate'].invoke
@@ -227,9 +227,10 @@ end
 
 
 
-# PROCFILE
-create_file "Procfile", "web: bundle exec puma -C config/puma.rb"
+create_file "Procfile", "web: bundle exec puma -C config/puma.rb" # Procfile
 
 commit "Creation"
+
+run 'bundle exec rake app:bootstrap'
 
 
