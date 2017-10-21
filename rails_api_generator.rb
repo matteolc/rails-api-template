@@ -63,31 +63,31 @@ empty_directory 'app/resources/api/v1'
   copy_from_repo "app/resources/api/v1/#{resource}_resource.rb"
 end
 create_file "app/resources/api/v1/account_resource.rb" do
-  class Api::V1::AccountResource < Api::V1::ApiResource
+  "class Api::V1::AccountResource < Api::V1::ApiResource
     attributes  :email,
                 :username
-  end
+  end"
 end
 empty_directory 'app/controllers/api/v1' # Controllers
 %w(api registrations sessions).each do |controller|
   copy_from_repo "app/controllers/api/v1/#{controller}_controller.rb"
 end
 create_file "app/controllers/api/v1/accounts_controller.rb" do
-  class Api::V1::AccountsController < Api::V1::ApiController
-  end
+  "class Api::V1::AccountsController < Api::V1::ApiController
+  end"
 end
 create_file "app/controllers/api/v1/users_controller.rb" do
-  class Api::V1::UsersController < Api::V1::ApiController
-  end
+  "class Api::V1::UsersController < Api::V1::ApiController
+  end"
 end
 create_file "app/controllers/api/v1/user_processor.rb" do
-  class Api::V1::UserProcessor < JSONAPI::Authorization::AuthorizingProcessor
+  "class Api::V1::UserProcessor < JSONAPI::Authorization::AuthorizingProcessor
     after_find do
       unless @result.is_a?(JSONAPI::ErrorsOperationResult)
         @result.meta[:record_total] = User.count
       end
     end
-  end
+  end"
 end
 insert_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::API" do # Authorization
   "
@@ -224,6 +224,7 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
     end
   end"
 end
+
 
 
 # PROCFILE
