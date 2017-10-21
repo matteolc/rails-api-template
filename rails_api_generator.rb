@@ -60,7 +60,7 @@ empty_directory 'lib/templates/active_record/model' # Models template
 copy_from_repo "lib/templates/active_record/model/model.rb"
 empty_directory 'app/resources/api/v1' 
 %w(api user).each do |resource|  # JSONAPI resources
-  copy_from_repo "app/resources/api/v1/#{resource}.rb"
+  copy_from_repo "app/resources/api/v1/#{resource}_resource.rb"
 end
 create_file "app/resources/api/v1/account_resource.rb" do
   class Api::V1::AccountResource < Api::V1::ApiResource
@@ -224,7 +224,6 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
     end
   end"
 end
-
 
 
 # PROCFILE
