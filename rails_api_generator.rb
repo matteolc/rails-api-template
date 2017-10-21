@@ -21,10 +21,11 @@ def commit(msg)
   git commit: "-m '#{msg}'"	
 end
 
+# 1
 git :init
 commit "Initial commit"
 
-# GEMS
+# Gems
 gem 'annotate', group: :development
 gem_group :development, :test do
   gem 'awesome_print'
@@ -39,7 +40,6 @@ gem 'sidekiq'
 gem 'rufus-scheduler'
 gem 'daemons'
 gem 'rollbar'
-
 gem 'jsonapi-resources'
 gem 'pg_search'
 gem 'dotenv-rails'
@@ -48,8 +48,6 @@ gem 'pundit'
 gem 'jsonapi-authorization', git: 'https://github.com/venuu/jsonapi-authorization.git'
 gem 'rolify'
 gem 'jwt'
-
-
 gsub_file 'Gemfile', "# gem 'rack-cors'", "gem 'rack-cors'"
 gsub_file 'Gemfile', "# gem 'bcrypt', '~> 3.1.7'", "gem 'bcrypt', '~> 3.1.7'"
 run 'bundle install'
