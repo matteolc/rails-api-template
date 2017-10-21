@@ -56,6 +56,7 @@ run 'bundle install'
 end
 empty_directory 'app/models/concerns' 
 copy_from_repo 'app/models/concerns/has_secure_tokens.rb' # JWT
+copy_from_repo 'app/models/concerns/has_fulltext_search.rb' # Fulltext search
 empty_directory 'lib/templates/active_record/model' # Models template
 copy_from_repo "lib/templates/active_record/model/model.rb"
 empty_directory 'app/resources/api/v1' 
@@ -236,8 +237,8 @@ end
 end
 insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do # Routes
   "
-  jsonapi_resources :posts
-  jsonapi_resources :authors"
+      jsonapi_resources :posts
+      jsonapi_resources :authors"
 end
 
 create_file "Procfile", "web: bundle exec puma -C config/puma.rb" # Procfile
