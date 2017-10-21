@@ -59,8 +59,14 @@ copy_from_repo 'app/models/concerns/has_secure_tokens.rb' # JWT
 empty_directory 'lib/templates/active_record/model' # Models template
 copy_from_repo "lib/templates/active_record/model/model.rb"
 empty_directory 'app/resources/api/v1' 
-%w(api user account).each do |resource|  # JSONAPI resources
+%w(api user).each do |resource|  # JSONAPI resources
   copy_from_repo "app/resources/api/v1/#{resource}.rb"
+end
+create_file "app/resources/api/v1/account_resource.rb" do
+  class Api::V1::AccountResource < Api::V1::ApiResource
+    attributes  :email,
+                :username
+  end
 end
 empty_directory 'app/controllers/api/v1' # Controllers
 %w(api registrations sessions).each do |controller|
