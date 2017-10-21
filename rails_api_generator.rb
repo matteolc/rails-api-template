@@ -21,7 +21,6 @@ def commit(msg)
   git commit: "-m '#{msg}'"	
 end
 
-# 1
 git :init
 commit "Initial commit"
 
@@ -59,9 +58,30 @@ empty_directory 'app/models/concerns'
 copy_from_repo 'app/models/concerns/has_secure_tokens.rb' # JWT
 empty_directory 'lib/templates/active_record/model' # Models template
 copy_from_repo "lib/templates/active_record/model/model.rb"
+empty_directory 'app/resources/api/v1' 
+%w(api user account).each do |resource|  # JSONAPI resources
+  copy_from_repo "app/resources/api/v1/#{resource}.rb"
+end
 empty_directory 'app/controllers/api/v1' # Controllers
-%w(api users registrations sessions).each do |controller|
+%w(api registrations sessions).each do |controller|
   copy_from_repo "app/controllers/api/v1/#{controller}_controller.rb"
+end
+create_file "app/controllers/api/v1/accounts_controller.rb" do
+  class Api::V1::AccountsController < Api::V1::ApiController
+  end
+end
+create_file "app/controllers/api/v1/users_controller.rb" do
+  class Api::V1::UsersController < Api::V1::ApiController
+  end
+end
+create_file "app/controllers/api/v1/user_processor.rb" do
+  class Api::V1::UserProcessor < JSONAPI::Authorization::AuthorizingProcessor
+    after_find do
+      unless @result.is_a?(JSONAPI::ErrorsOperationResult)
+        @result.meta[:record_total] = User.count
+      end
+    end
+  end
 end
 insert_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::API" do # Authorization
   "
@@ -70,7 +90,7 @@ end
 empty_directory 'app/controllers/concerns' 
 copy_from_repo 'app/controllers/concerns/authorization.rb' # Authorization
 empty_directory 'app/policies' # Policies
-%w(application user).each do |policy|
+%w(application user account).each do |policy|
   copy_from_repo "app/policies/#{policy}_policy.rb"
 end
 %w(extensions users roles).each do |migration| # Migrations
@@ -91,22 +111,11 @@ end
 insert_into_file "config/database.yml", after: "<<: *default\n" do 
 "  <<: *local\n" 
 end
+# Db seeds
+empty_directory 'db/seeds'
+copy_from_repo "db/seeds/users.rb"
 application "config.active_record.default_timezone = :utc" # Timezone
 application "config.active_job.queue_adapter = :sidekiq" # Job processor        
-insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do # Routes
-  "
-   namespace :api do
-    namespace :v1 do
-      post 'login', to: 'sessions#create'
-      delete 'logout', to: 'sessions#destroy'
-      post 'signup', to: 'registrations#create'
-      jsonapi_resources :accounts, only: [:show, :edit, :update]
-      jsonapi_resources :posts
-      jsonapi_resources :authors
-      jsonapi_resources :users
-    end
-  end"
-end
 # Rake tasks
 rakefile("auto_annotate_models.rake") do <<-'TASK'    
 if Rails.env.development?
@@ -183,10 +192,6 @@ rakefile("app.rake") do <<-'TASK'
 TASK
 end
 
-# Db seeds
-empty_directory 'db/seeds'
-copy_from_repo "db/seeds/users.rb"
-
 rakefile("custom_seed.rake") do <<-'TASK'  
 namespace :db do
   namespace :seed do
@@ -201,8 +206,20 @@ end
 TASK
 end
 
-# Example resources
-generate "model", "Author name:string"
+insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do # Routes
+  "
+   namespace :api do
+    namespace :v1 do
+      post 'login', to: 'sessions#create'
+      delete 'logout', to: 'sessions#destroy'
+      post 'signup', to: 'registrations#create'
+      jsonapi_resources :accounts, only: [:show, :edit, :update]
+      jsonapi_resources :users
+    end
+  end"
+end
+
+
 
 # PROCFILE
 create_file "Procfile", "web: bundle exec puma -C config/puma.rb"
