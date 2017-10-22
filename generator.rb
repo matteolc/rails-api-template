@@ -18,7 +18,7 @@ end
 
 def ask_default(question, default_answer)
   answer = ask(question) 
-  answer.empty? default_answer : answer
+  answer.empty? ? default_answer : answer
 end
 
 def commit(msg)
@@ -199,6 +199,7 @@ rakefile("app.rake") do <<-'TASK'
       Rake::Task['db:drop'].invoke
       Rake::Task['db:create'].invoke
       Rake::Task['db:migrate'].invoke
+      Rake::Task['db:seed:users'].invoke
     end
  end    
 TASK
