@@ -219,7 +219,7 @@ end
 
 if (example_app = yes?("Do you want to add example application files?"))
   generate "model", "Author name:string"
-  generate "model", "Post title:string body:text author_id:uuid published_at:datetime likes:integer published:boolean category:string"
+  generate "model", "Post title:string body:text author:references published_at:datetime likes:integer published:boolean category:string"
   %w(authors posts).each do |seed| copy_from_repo "db/seeds/#{seed}.rb" end
   %w(author post).each do |resource| copy_from_repo "app/resources/api/v1/#{resource}_resource.rb" end
   %w(author post).each do |policy| copy_from_repo "app/policies/#{policy}_policy.rb" end
