@@ -280,12 +280,12 @@ run 'bundle exec rake db:migrate'
 run 'bundle exec rake db:seed:users'
 if example_app
   insert_into_file "app/models/post.rb", after: "class Post < ActiveRecord::Base" do "
-  include HasFreetextSearch
-  has_freetext_search"
+  include HasFulltextSearch
+  has_fulltext_search"
   end
   insert_into_file "app/models/author.rb", after: "class Author < ActiveRecord::Base" do "
-  include HasFreetextSearch
-  has_freetext_search"
+  include HasFulltextSearch
+  has_fulltext_search"
   end  
   run 'bundle exec rake db:seed:authors'
   run 'bundle exec rake db:seed:posts'
