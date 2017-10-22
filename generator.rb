@@ -16,6 +16,11 @@ def copy_from_repo(filename, opts={})
   end
 end
 
+def ask_default(question, default_answer)
+  answer = ask(question) 
+  answer.empty? default_answer : answer
+end
+
 def commit(msg)
   git add: "."
   git commit: "-m '#{msg}'"	
@@ -246,16 +251,16 @@ create_file "Procfile", "web: bundle exec puma -C config/puma.rb" # Procfile
 
 commit "Creation"
 
-db_user = ask("Who is the database user (leave empty for dba)?") 
-db_password = ask("What is the database password (leave empty for 12345678)?", echo: false)
-db_host = ask("Who is the database host (leave empty for localhost)?")
-jwt_secret = ask("Please choose a JWT secret (leave empty for secret)")
+db_user = ask_default("Who is the database user (leave empty for dba)?", 'dba') 
+db_password = ask_default("What is the database password (leave empty for 12345678)?", '12345678')
+db_host = ask_default("Who is the database host (leave empty for localhost)?", 'localhost')
+jwt_secret = ask_default("Please choose a JWT secret (leave empty for secret)", 'secret')
 
 create_file '.env' do
-  "DATABASE_USER=#{db_user || 'dba'}
-  DATABASE_PASSWORD=#{db_password || '12345678'}
-  DATABASE_HOST=#{db_host || 'localhost'}
-  JWT_SECRET=#{jwt_secret || 'secret'}"
+  "DATABASE_USER=#{db_user}
+  DATABASE_PASSWORD=#{db_password}
+  DATABASE_HOST=#{db_host}
+  JWT_SECRET=#{jwt_secret}"
 end
 
 create_file '.env.production' do
