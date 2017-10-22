@@ -218,8 +218,10 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
 end
 
 if (example_app = yes?("Do you want to add example application files?"))
-  generate "model", "Author name:string"
-  copy_from_repo "db/migrate/create_posts.rb", {migration_ts: true}
+  %w(authors posts).each do |migration| copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true} end
+  create_file 'app/models/author.rb' do "class Author < ApplicationRecord
+    has_many :posts
+end" end  
   create_file 'app/models/post.rb' do "class Post < ApplicationRecord
     belongs_to :author
 end" end
@@ -289,11 +291,15 @@ run 'bundle exec rake app:setup'
 if example_app
   insert_into_file "app/models/post.rb", after: "class Post < ApplicationRecord" do "
   include HasFulltextSearch
-  has_fulltext_search"
+  has_fulltext_search
+  
+  belongs_to :author"
   end
   insert_into_file "app/models/author.rb", after: "class Author < ApplicationRecord" do "
   include HasFulltextSearch
-  has_fulltext_search"
+  has_fulltext_search
+  
+  has_many :posts"
   end  
   run 'bundle exec rake db:seed:authors'
   run 'bundle exec rake db:seed:posts'
