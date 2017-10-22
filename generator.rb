@@ -294,15 +294,11 @@ run 'bundle exec rake app:setup'
 if example_app
   insert_into_file "app/models/post.rb", after: "class Post < ApplicationRecord" do "
   include HasFulltextSearch
-  has_fulltext_search
-  
-  belongs_to :author"
+  has_fulltext_search"
   end
   insert_into_file "app/models/author.rb", after: "class Author < ApplicationRecord" do "
   include HasFulltextSearch
-  has_fulltext_search
-  
-  has_many :posts"
+  has_fulltext_search"
   end  
   run 'bundle exec rake db:seed:authors'
   run 'bundle exec rake db:seed:posts'
@@ -313,5 +309,7 @@ commit "Bootstrap"
 run 'cd public/app && yarn install'
 
 commit "Client packages"
+
+
 
 

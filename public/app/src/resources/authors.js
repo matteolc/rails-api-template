@@ -43,7 +43,7 @@ export const AuthorList = (props) => (
         {...props}
         filters={< Filters />}>
         <SimpleList
-            primaryText={record => record.nickname}
+            primaryText={record => record.name}
             secondaryText={record => record.id}
             tertiaryText={record => record['created-at']}/>
     </List>

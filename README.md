@@ -57,6 +57,5 @@ foreman start
 
 ```
 cd myapi/public/app
-yarn install
 yarn start
 ```
