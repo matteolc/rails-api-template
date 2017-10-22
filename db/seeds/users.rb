@@ -9,5 +9,5 @@ user = User.create email: Faker::Internet.email,
                    password: '123',
                    username: 'user'
                    
-user.add_role :user
+user.add_role :regular
 

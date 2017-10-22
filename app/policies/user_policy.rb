@@ -1,24 +1,29 @@
 class UserPolicy < ApplicationPolicy
-    
-   
-     def index?
-       user.has_any_role?(:admin)
-     end
-   
-     def create?
-        user.has_any_role?(:admin)
-     end
-   
-     def show?
-        user.has_any_role?(:admin)
-     end
-   
-     def update?
-        user.has_any_role?(:admin)
-     end
-   
-     def destroy?
-        user.has_any_role?(:admin)
-     end
-      
+  
+ 
+   def index?
+    raise Pundit::NotAuthorizedError unless user.has_any_role?(:admin)
+    true
    end
+ 
+   def create?
+    raise Pundit::NotAuthorizedError unless user.has_any_role?(:admin)
+    true
+   end
+ 
+   def show?
+    raise Pundit::NotAuthorizedError unless user.has_any_role?(:admin)
+    true
+   end
+ 
+   def update?
+    raise Pundit::NotAuthorizedError unless user.has_any_role?(:admin)
+    true
+   end
+ 
+   def destroy?
+    raise Pundit::NotAuthorizedError unless user.has_any_role?(:admin)
+    true
+   end
+    
+end

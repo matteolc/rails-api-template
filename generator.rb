@@ -56,7 +56,7 @@ gsub_file 'Gemfile', "# gem 'rack-cors'", "gem 'rack-cors'"
 gsub_file 'Gemfile', "# gem 'bcrypt', '~> 3.1.7'", "gem 'bcrypt', '~> 3.1.7'"
 run 'bundle install'
 
-%w(user role json_web_token).each do |model| copy_from_repo "app/models/#{model}.rb" end
+%w(account user role json_web_token).each do |model| copy_from_repo "app/models/#{model}.rb" end
 empty_directory 'app/models/concerns' 
 copy_from_repo 'app/models/concerns/has_secure_tokens.rb'
 copy_from_repo 'app/models/concerns/has_fulltext_search.rb'
@@ -181,7 +181,7 @@ end
 
 rakefile("app.rake") do <<-'TASK'    
   namespace :app do
-    task :reset => :environment do
+    task :setup => :environment do
       Rake::Task['db:drop'].invoke
       Rake::Task['db:create'].invoke
       Rake::Task['db:migrate'].invoke
@@ -219,7 +219,28 @@ end
 
 if (example_app = yes?("Do you want to add example application files?"))
   generate "model", "Author name:string"
-  generate "model", "Post title:string body:text author:references published_at:datetime likes:integer published:boolean category:string"
+  copy_from_repo "db/migrate/create_posts.rb", {migration_ts: true}
+  create_file 'app/models/post.rb' do "class Post < ApplicationRecord
+    belongs_to :author
+end" end
+  create_file 'app/controllers/api/v1/authors_controller.rb' do "class Api::V1::AuthorsController < Api::V1::ApiController
+end" end
+  create_file 'app/controllers/api/v1/posts_controller.rb' do "class Api::V1::PostsController < Api::V1::ApiController
+end" end
+  #create_file 'app/controllers/api/v1/post_processor.rb' do "class Api::V1::PostProcessor < JSONAPI::Authorization::AuthorizingProcessor
+  #after_find do
+  #  unless @result.is_a?(JSONAPI::ErrorsOperationResult)
+  #    @result.meta[:record_total] = Post.count
+  #  end
+  #end
+#end" end
+  #create_file 'app/controllers/api/v1/author_processor.rb' do "class Api::V1::AuthorProcessor < JSONAPI::Authorization::AuthorizingProcessor
+  #after_find do
+  #  unless @result.is_a?(JSONAPI::ErrorsOperationResult)
+  #    @result.meta[:record_total] = Author.count
+  #  end
+  #end
+#end" end
   %w(authors posts).each do |seed| copy_from_repo "db/seeds/#{seed}.rb" end
   %w(author post).each do |resource| copy_from_repo "app/resources/api/v1/#{resource}_resource.rb" end
   %w(author post).each do |policy| copy_from_repo "app/policies/#{policy}_policy.rb" end
@@ -256,15 +277,21 @@ create_file '.env.production' do
   SENDGRID_KEY="
 end
 
-run 'bundle exec rake db:create'
-run 'bundle exec rake db:migrate'
-run 'bundle exec rake db:seed:users'
+ip_addr = UDPSocket.open {|s| s.connect("4.4.4.4", 1); s.addr.last}
+create_file 'public/app/.env' do
+  "REACT_APP_NAME=React-Rails-JSON-API
+  REACT_APP_API_PROTOCOL=http
+  REACT_APP_API_ADDRESS=#{ip_addr}
+  REACT_APP_API_PORT=5000"
+end
+
+run 'bundle exec rake app:setup'
 if example_app
-  insert_into_file "app/models/post.rb", after: "class Post < ActiveRecord::Base" do "
+  insert_into_file "app/models/post.rb", after: "class Post < ApplicationRecord" do "
   include HasFulltextSearch
   has_fulltext_search"
   end
-  insert_into_file "app/models/author.rb", after: "class Author < ActiveRecord::Base" do "
+  insert_into_file "app/models/author.rb", after: "class Author < ApplicationRecord" do "
   include HasFulltextSearch
   has_fulltext_search"
   end  
