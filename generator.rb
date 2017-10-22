@@ -1,8 +1,9 @@
 def migration_ts
 	sleep(1)
 	Proc.new { Time.now.strftime("%Y%m%d%H%M%S") }
-end    
-	
+end   
+
+
 def copy_from_repo(filename, opts={})
   repo = "https://raw.githubusercontent.com/matteolc/rails-api-template/master/"
   source_filename = filename
@@ -279,6 +280,8 @@ create_file '.env.production' do
   SENDGRID_KEY="
 end
 
+run 'cd public && svn export https://github.com/matteolc/rails-api-template/trunk/public/app && cd ..'
+
 ip_addr = UDPSocket.open {|s| s.connect("4.4.4.4", 1); s.addr.last}
 create_file 'public/app/.env' do
   "REACT_APP_NAME=React-Rails-JSON-API
@@ -306,5 +309,9 @@ if example_app
 end
 
 commit "Bootstrap"
+
+run 'cd public/app && yarn install'
+
+commit "Client packages"
 
 
