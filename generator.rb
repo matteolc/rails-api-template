@@ -56,28 +56,22 @@ gsub_file 'Gemfile', "# gem 'rack-cors'", "gem 'rack-cors'"
 gsub_file 'Gemfile', "# gem 'bcrypt', '~> 3.1.7'", "gem 'bcrypt', '~> 3.1.7'"
 run 'bundle install'
 
-%w(user role json_web_token).each do |model|  # Models
-  copy_from_repo "app/models/#{model}.rb"
-end
+%w(user role json_web_token).each do |model| copy_from_repo "app/models/#{model}.rb" end
 empty_directory 'app/models/concerns' 
-copy_from_repo 'app/models/concerns/has_secure_tokens.rb' # JWT
-copy_from_repo 'app/models/concerns/has_fulltext_search.rb' # Fulltext search
-empty_directory 'lib/templates/active_record/model' # Models template
+copy_from_repo 'app/models/concerns/has_secure_tokens.rb'
+copy_from_repo 'app/models/concerns/has_fulltext_search.rb'
+empty_directory 'lib/templates/active_record/model'
 copy_from_repo "lib/templates/active_record/model/model.rb"
 empty_directory 'app/resources/api/v1' 
-%w(api user).each do |resource|  # JSONAPI resources
-  copy_from_repo "app/resources/api/v1/#{resource}_resource.rb"
-end
+%w(api user).each do |resource| copy_from_repo "app/resources/api/v1/#{resource}_resource.rb" end
 create_file "app/resources/api/v1/account_resource.rb" do
   "class Api::V1::AccountResource < Api::V1::ApiResource
     attributes  :email,
                 :username
   end"
 end
-empty_directory 'app/controllers/api/v1' # Controllers
-%w(api registrations sessions).each do |controller|
-  copy_from_repo "app/controllers/api/v1/#{controller}_controller.rb"
-end
+empty_directory 'app/controllers/api/v1' 
+%w(api registrations sessions).each do |controller| copy_from_repo "app/controllers/api/v1/#{controller}_controller.rb" end
 create_file "app/controllers/api/v1/accounts_controller.rb" do
   "class Api::V1::AccountsController < Api::V1::ApiController
   end"
@@ -95,25 +89,18 @@ create_file "app/controllers/api/v1/user_processor.rb" do
     end
   end"
 end
-insert_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::API" do # Authorization
-  "
+insert_into_file "app/controllers/application_controller.rb", after: "class ApplicationController < ActionController::API" do "
   include Authorization"
 end
 empty_directory 'app/controllers/concerns' 
-copy_from_repo 'app/controllers/concerns/authorization.rb' # Authorization
-empty_directory 'app/policies' # Policies
-%w(application user account).each do |policy|
-  copy_from_repo "app/policies/#{policy}_policy.rb"
-end
-%w(extensions users roles).each do |migration| # Migrations
-  copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true}
-end 
-%w(redis rollbar cors generators jsonapi_resources).each do |initializer| # Initializers
-  copy_from_repo "config/initializers/#{initializer}.rb"
-end
+copy_from_repo 'app/controllers/concerns/authorization.rb' 
+empty_directory 'app/policies' 
+%w(application user account).each do |policy| copy_from_repo "app/policies/#{policy}_policy.rb" end
+%w(extensions users roles).each do |migration| copy_from_repo "db/migrate/create_#{migration}.rb", {migration_ts: true} end 
+%w(redis rollbar cors generators jsonapi_resources).each do |initializer| copy_from_repo "config/initializers/#{initializer}.rb" end
 copy_from_repo "config/sidekiq.yml"
 copy_from_repo "config/puma.rb"
-prepend_to_file 'config/database.yml' do # Db config
+prepend_to_file 'config/database.yml' do 
   "local: &local
     username: <%= ENV['DATABASE_USER'] %>
     password: <%= ENV['DATABASE_PASSWORD'] %>
@@ -123,12 +110,11 @@ end
 insert_into_file "config/database.yml", after: "<<: *default\n" do 
 "  <<: *local\n" 
 end
-# Db seeds
 empty_directory 'db/seeds'
 copy_from_repo "db/seeds/users.rb"
-application "config.active_record.default_timezone = :utc" # Timezone
-application "config.active_job.queue_adapter = :sidekiq" # Job processor        
-# Rake tasks
+application "config.active_record.default_timezone = :utc" 
+application "config.active_job.queue_adapter = :sidekiq"       
+
 rakefile("auto_annotate_models.rake") do <<-'TASK'    
 if Rails.env.development?
   task :set_annotation_options do
@@ -219,8 +205,7 @@ end
 TASK
 end
 
-insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do # Routes
-  "
+insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do "
    namespace :api do
     namespace :v1 do
       post 'login', to: 'sessions#create'
@@ -232,23 +217,18 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
   end"
 end
 
-if (example_app = yes?("Do you want to add example application files?")) # Example resources 
+if (example_app = yes?("Do you want to add example application files?"))
   generate "model", "Author name:string"
   generate "model", "Post title:string body:text author_id:uuid published_at:datetime likes:integer published:boolean category:string"
-  %w(author post).each do |resource|  # JSONAPI resources
-    copy_from_repo "app/resources/api/v1/#{resource}_resource.rb"
-  end
-  %w(author post).each do |policy|
-    copy_from_repo "app/policies/#{policy}_policy.rb"
-  end
-  insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do # Routes
-    "
+  %w(author post).each do |resource| copy_from_repo "app/resources/api/v1/#{resource}_resource.rb" end
+  %w(author post).each do |policy| copy_from_repo "app/policies/#{policy}_policy.rb" end
+  insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do "
         jsonapi_resources :posts
         jsonapi_resources :authors"
   end
 end
 
-create_file "Procfile", "web: bundle exec puma -C config/puma.rb" # Procfile
+create_file "Procfile", "web: bundle exec puma -C config/puma.rb" 
 
 commit "Creation"
 
