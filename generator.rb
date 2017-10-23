@@ -230,20 +230,6 @@ end" end
 end" end
   create_file 'app/controllers/api/v1/posts_controller.rb' do "class Api::V1::PostsController < Api::V1::ApiController
 end" end
-  #create_file 'app/controllers/api/v1/post_processor.rb' do "class Api::V1::PostProcessor < JSONAPI::Authorization::AuthorizingProcessor
-  #after_find do
-  #  unless @result.is_a?(JSONAPI::ErrorsOperationResult)
-  #    @result.meta[:record_total] = Post.count
-  #  end
-  #end
-#end" end
-  #create_file 'app/controllers/api/v1/author_processor.rb' do "class Api::V1::AuthorProcessor < JSONAPI::Authorization::AuthorizingProcessor
-  #after_find do
-  #  unless @result.is_a?(JSONAPI::ErrorsOperationResult)
-  #    @result.meta[:record_total] = Author.count
-  #  end
-  #end
-#end" end
   %w(authors posts).each do |seed| copy_from_repo "db/seeds/#{seed}.rb" end
   %w(author post).each do |resource| copy_from_repo "app/resources/api/v1/#{resource}_resource.rb" end
   %w(author post).each do |policy| copy_from_repo "app/policies/#{policy}_policy.rb" end
@@ -280,7 +266,25 @@ create_file '.env.production' do
   SENDGRID_KEY="
 end
 
-run 'cd public && svn export https://github.com/matteolc/rails-api-template/trunk/public/app && cd ..'
+frontend_ui = ask_default("Which frontend UI do you want to use (material or grommet)? (leave empty for material)?", 'material') 
+run "cd public && svn export https://github.com/matteolc/rails-api-template/trunk/public/app-#{frontend_ui} && mv ./app-#{frontend_ui} ./app && cd .."
+
+if (frontend_ui==='grommet')
+  create_file 'app/controllers/api/v1/post_processor.rb' do "class Api::V1::PostProcessor < JSONAPI::Authorization::AuthorizingProcessor
+  after_find do
+    unless @result.is_a?(JSONAPI::ErrorsOperationResult)
+      @result.meta[:record_total] = Post.count
+    end
+  end
+end" end
+  create_file 'app/controllers/api/v1/author_processor.rb' do "class Api::V1::AuthorProcessor < JSONAPI::Authorization::AuthorizingProcessor
+  after_find do
+    unless @result.is_a?(JSONAPI::ErrorsOperationResult)
+      @result.meta[:record_total] = Author.count
+    end
+  end
+end" end
+end
 
 ip_addr = UDPSocket.open {|s| s.connect("4.4.4.4", 1); s.addr.last}
 create_file 'public/app/.env' do
