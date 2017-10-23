@@ -21,10 +21,9 @@ built with simplicity and light-weight in mind.
 ## Frontend
 
 + Bootstrapped with `create-react-app` for [React](https://reactjs.org/) 16
-+ Uses [Admin-On-Rest](https://github.com/marmelab/admin-on-rest)
-+ Uses [Material UI](http://www.material-ui.com)
-+ Provides a JWT authorization client to use with AOR
-+ Provides a JSON-API REST client to use with AOR
++ Uses [Admin-On-Rest](https://github.com/marmelab/admin-on-rest) with [Material UI](http://www.material-ui.com) or [Grommet](http://grommet.io)
++ Includes a JWT authorization client
++ Includes a JSON-API REST data client
 
 # Requirements
 
@@ -40,7 +39,8 @@ gem install \
     rails \
     foreman \
     thor \
-    --no-rdoc --no-ri
+    --no-rdoc \
+    --no-ri
 ```
 
 ```

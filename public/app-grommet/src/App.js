@@ -1,6 +1,6 @@
 import React from 'react';
 import {Admin, Resource, fetchUtils} from 'grommet-on-rest';
-import jsonAPIRestClient from './jsonApiRestClient';
+import dataClient from './dataClient';
 import { 
   PostList, 
   PostEdit, 
@@ -32,7 +32,7 @@ const httpClient = (url, options = {}) => {
   return fetchUtils.fetchJson(url, options);
 }
 
-export const apiClient = jsonAPIRestClient(baseApiUrl, httpClient);
+export const apiClient = dataClient(baseApiUrl, httpClient);
 
 const App = () => (
   <Admin
@@ -61,7 +61,6 @@ const App = () => (
         show={UserShow} 
         remove={Delete} 
         edit={UserEdit} 
-        icon={UserIcon}
         create={UserCreate}/>,
       <Resource 
         name="accounts" 

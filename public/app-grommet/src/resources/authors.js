@@ -27,7 +27,7 @@ import {
 
 const Filters = (props) => (
     <Filter {...props}>
-        <TextInput source="name" alwaysOn/>
+        <TextInput source="name" label="Name" alwaysOn/>
     </Filter>
 );
 
