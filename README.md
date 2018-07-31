@@ -1,10 +1,9 @@
-# Rails-React-Template
-This template creates a Ruby on Rails backend API application and a React frontend client application, 
-built with simplicity and light-weight in mind.
+# Rails-API-Template
+This template creates a Ruby on Rails API application.
 
 ## Backend
 
-+ Standard JSON-API server backed by [JSON API Resources](http://jsonapi-resources.com)
++ Standard JSON-API server using [JSON API Resources](http://jsonapi-resources.com)
 + Use `UUID` instead of integer IDs by default in migrations
 + Standard `has_secure_password` extension used for storing user passwords
 + Multiple roles available per user, backed by [Rolify](https://github.com/RolifyCommunity/rolify)
@@ -16,20 +15,15 @@ built with simplicity and light-weight in mind.
 + Integration of client full-text search with JSONAPI-Resources
 + Provide a production ready Puma configuration
 + Provide a template for [Rollbar](https://rollbar.com) reporting (should be used in production only)
-+ Ready to be plugged in production to [Sidekiq](https://github.com/mperham/sidekiq)
-
-## Frontend
-
-+ Bootstrapped with `create-react-app` for [React](https://reactjs.org/) 16
-+ Uses [Admin-On-Rest](https://github.com/marmelab/admin-on-rest) with [Material UI](http://www.material-ui.com) or [Grommet](http://grommet.io)
-+ Includes a JWT authorization client
-+ Includes a JSON-API REST data client
++ Provides connection to New Relic
++ Uses Memcached as underlying cache store
 
 # Requirements
 
-+ **Ruby** 2.4.2. Rails 5.1.4 will be installed by `bundler`.
++ **Ruby** 2.4.2
++ **Rails** 5.2.1
 + **Postgresql** 9.6
-+ **Node** 8.3.0. React 16 will be installed by `yarn`
++ **Memcached**
 
 # Usage
 
@@ -54,8 +48,3 @@ rails new myapi \
 cd myapi
 foreman start
 ```               
-
-```
-cd myapi/public/app
-yarn start
-```

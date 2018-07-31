@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 module HasSecureTokens	
     
     extend ActiveSupport::Concern
 
     class_methods do                    
-        def has_secure_tokens(options = {})
-        end
+        def has_secure_tokens(options = {}); end
     end
 
     included do
@@ -29,11 +30,9 @@ module HasSecureTokens
     end 
   
     def has_valid_token?(token)
-
         tokens.each do |stored_token|
             return true if stored_token == token
         end
-
         false
     end     
     

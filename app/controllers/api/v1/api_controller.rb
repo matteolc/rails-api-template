@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Api::V1::ApiController < ApplicationController
   include JSONAPI::ActsAsResourceController        
   before_action :authenticate_user!     
@@ -5,7 +7,8 @@ class Api::V1::ApiController < ApplicationController
   private
 
   def context
-      {user: current_user}
+    { user: current_user,
+      action: action_name }
   end
 
 end

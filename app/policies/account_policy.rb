@@ -5,26 +5,22 @@ class AccountPolicy < ApplicationPolicy
   end
 
   def show?
-    raise Pundit::NotAuthorizedError unless user.id === record.id
-    true
+    user.id === record.id ?
+      true :
+      raise Pundit::NotAuthorizedError
   end
 
   def update?
-    raise Pundit::NotAuthorizedError unless user.id === record.id
-    true
+    user.id === record.id ?
+      true :
+      raise Pundit::NotAuthorizedError
   end
 
   def destroy?
-    raise Pundit::NotAuthorizedError unless user.id === record.id
-    true
+    user.id === record.id ?
+      true :
+      raise Pundit::NotAuthorizedError
   end
-
-  class Scope < Scope
-    def resolve
-      scope.all
-    end
-  end
-
-  
+ 
 end
 

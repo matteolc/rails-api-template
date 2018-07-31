@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class JsonWebToken
     
     attr_reader :algorithm, :secret
@@ -12,7 +14,8 @@ class JsonWebToken
     end
 
     def decode(token)
-        return HashWithIndifferentAccess.new(JWT.decode(token, secret, true, {:algorithm => algorithm})[0])
+        return HashWithIndifferentAccess.new
+            JWT.decode(token, secret, true, { :algorithm => algorithm })[0]
     end
 
 end

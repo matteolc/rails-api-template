@@ -5,9 +5,9 @@ admin = User.create email: Faker::Internet.email,
                    
 admin.add_role :admin
 
-user = User.create email: Faker::Internet.email,
+guest = User.create email: Faker::Internet.email,
                    password: '123',
-                   username: 'user'
+                   username: 'guest'
                    
-user.add_role :regular
+guest.add_role :guest
 

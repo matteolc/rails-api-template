@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Api::V1::RegistrationsController < ApplicationController
     
     before_action :authenticate_user!, except: :create
@@ -7,12 +9,11 @@ class Api::V1::RegistrationsController < ApplicationController
         if @account.save
           render json: @account, status: :ok
         else
-          render json: {errors: [{status: :bad_request, title: 'Creation Error', detail: "There was a problem processing your request" }]}, status: :bad_request
+          render_error "There was a problem processing your request"
         end
     end
 
-    def destroy 
-    end
+    def destroy; end
     
     private
     
