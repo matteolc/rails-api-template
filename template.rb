@@ -260,8 +260,6 @@ create_file '.env' do
   JWT_SECRET=#{jwt_secret}"
 end
 
-create_file '.env.production' do "" end
-
 run 'bundle exec rake app:setup'
 
 
