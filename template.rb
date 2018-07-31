@@ -67,7 +67,7 @@ empty_directory 'app/models/concerns'
 %w(account user role json_web_token).each do |model| copy_from_repo "app/models/#{model}.rb" end
 
 # app/models/concerns
-%w(has_secure_tokens has_fulltext_search).each do |concern| copy_from_repo "app/models/concerns/#{concern}.rb"
+%w(has_secure_tokens has_fulltext_search).each do |concern| copy_from_repo "app/models/concerns/#{concern}.rb" end
 
 # app/controllers
 empty_directory 'app/controllers/api/v1'
