@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8' /> 
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Roboto:300,300i,400,400i,500,500i" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.1/css/materialize.min.css">
+    <style>
+      @font-face{
+        font-family: "Roboto";
+        src: url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i');
+      }    
+      body, html { font-family: 'Roboto', sans-serif; font-weight: 300; font-size: 12px; }
+      p { line-height: 14px; }
+      .footer-note { font-size: 8px; line-height: 10px; border-top: 3px solid rgb(63, 81, 181); padding-top: 6px; }
+      .footer-title { font-size: 9px; line-height: 11px; }
+      .pdf-title { margin-bottom: 40px; }
+      .pdf-section-header { margin-top: 30px; } 
+      th, td {
+         border-style:solid;
+         border-width:1px;
+         border-color:#bdbdbd;
+         padding: 0px 2px;
+      } 
+      div.alwaysbreak { page-break-before: always; }
+      div.nobreak:before { clear:both; }
+      div.nobreak { page-break-inside: avoid; }
+      thead { display: table-row-group; }                       
+    </style>
+    <script>
+      function number_pages() {
+        var vars={};
+        var x=document.location.search.substring(1).split('&');
+        for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = decodeURIComponent(z[1]);}
+        var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+        for(var i in x) {
+          var y = document.getElementsByClassName(x[i]);
+          for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+        }
+      }
+    </script>    
+  </head>
+  <body onload="number_pages()">
+    <div class="container">
+      <%= yield %>      
+    </div>
+  </body>
+</html>

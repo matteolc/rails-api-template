@@ -50,8 +50,7 @@ gem 'jsonb_accessor', '~> 1.0.0'
 gem 'puma_worker_killer'
 gem 'pundit'
 gem 'rolify'
-gem 'rollbar'
-gem 'newrelic_rpm'
+gem 'faker'
 gsub_file 'Gemfile', "# gem 'rack-cors'", "gem 'rack-cors'"
 gsub_file 'Gemfile', "# gem 'bcrypt', '~> 3.1.7'", "gem 'bcrypt', '~> 3.1.7'"
 run 'bundle install'
@@ -63,7 +62,6 @@ remove_file 'app/jobs'
 remove_file 'app/views'
 
 # app/models
-empty_directory 'app/models/concerns' 
 %w(account user role json_web_token).each do |model| copy_from_repo "app/models/#{model}.rb" end
 
 # app/models/concerns
@@ -75,7 +73,6 @@ copy_from_repo 'app/controllers/application_controller.rb'
 %w(api registrations sessions users accounts).each do |controller| copy_from_repo "app/controllers/api/v1/#{controller}_controller.rb" end
 
 # app/controllers/concerns
-empty_directory 'app/controllers/concerns' 
 copy_from_repo 'app/controllers/concerns/authorization.rb' 
 
 # app/policies
@@ -93,12 +90,11 @@ empty_directory 'spec/support'
 copy_from_repo 'spec/rails_helper.rb'
 copy_from_repo 'spec/spec_helper.rb'
 copy_from_repo 'spec/support/factory_bot.rb'
-copy_from_repo 'spec/factories/factories.rb'
+copy_from_repo 'spec/factories/users.rb'
 copy_from_repo 'spec/models/user_spec.rb'
   
 # config
 application "config.active_record.default_timezone = :utc" 
-application "config.active_job.queue_adapter = :sidekiq"       
 application "config.active_record.schema_format = :sql"
 gsub_file 'config/application.rb', 'require "active_job/railtie"', '# require "active_job/railtie"'
 gsub_file 'config/application.rb', 'require "active_storage/engine"', '# require "active_storage/engine"'
@@ -131,7 +127,7 @@ insert_into_file "config/database.yml", after: "<<: *default\n" do
 end
 
 # config/initializers
-%w(rollbar cors generators jsonapi_resources).each do |initializer| copy_from_repo "config/initializers/#{initializer}.rb" end
+%w(cors generators jsonapi_resources).each do |initializer| copy_from_repo "config/initializers/#{initializer}.rb" end
 
 # config/routes.rb
 insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" do "
@@ -143,7 +139,10 @@ insert_into_file "config/routes.rb", after: "Rails.application.routes.draw do" d
      jsonapi_resources :accounts, only: [:show, :edit, :update]
      jsonapi_resources :users
    end
- end"
+ end
+ get '/', to: 'application#not_found'
+ get '*path', to: 'application#not_found'
+ post '*path', to: 'application#not_found'"
 end
 
 # db/migrate
@@ -260,8 +259,182 @@ create_file '.env' do
   JWT_SECRET=#{jwt_secret}"
 end
 
+append_to_file '.gitignore', '.env'
+
 run 'bundle exec rake app:setup'
 
+commit "Setup"
+
+if (excel_support = yes?("Do you want to add support for Excel?"))
+
+  gem 'axlsx', '~> 2.1.0.pre'  
+  gem 'roo'
+  gem 'roo-xls'
+  gem 'spreadsheet_architect', '~> 2.0.2'
+
+  empty_directory 'app/models/concerns/acts_as_spreadsheet'
+  copy_from_repo "app/models/concerns/acts_as_spreadsheet/spreadsheet.rb"
+  copy_from_repo "app/controllers/api/v1/excel_controller.rb"
+
+  insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do "
+    get 'download', to: 'excel#download'"
+  end    
+
+  run 'bundle install'
+
+  commit "Excel"
+
+end
+
+if (pdf_support = yes?("Do you want to add support for PDF?"))
+
+  gem 'wicked_pdf'
+  gem 'wkhtmltopdf-binary'
+
+  copy_from_repo "app/controllers/api/v1/pdf_controller.rb"
+
+  insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do "
+    get 'print/:id', to: 'pdf#print'"
+  end  
+
+  gsub_file 'config/application.rb', '# require "action_view/railtie"', 'require "action_view/railtie"' 
+  empty_directory 'app/views/layouts'
+  copy_from_repo "app/views/layouts/pdf.html.erb"  
+
+  run 'bundle install'
+
+  commit "PDF"
+
+end
+
+if (bj_support = yes?("Do you want to add support for background jobs and scheduling?"))
+
+  gem 'rufus-scheduler'
+  gem 'sidekiq'
+
+  copy_from_repo "config/sidekiq.yml"
+  copy_from_repo "config/initializers/redis.rb"
+  copy_from_repo "config/initializers/sidekiq.rb"
+
+  gsub_file 'config/application.rb', '# require "active_job/railtie"', 'require "active_job/railtie"' 
+  application "config.active_job.queue_adapter = :sidekiq"
+  empty_directory 'app/jobs'
+  copy_from_repo "app/jobs/application_job.rb"
+
+  append_to_file '.env' do "
+REDIS_URL=redis://127.0.0.1:6379"
+  end
+
+  run 'bundle install'
+
+  commit "jobs & scheduler"
+
+end
+
+if (email_support = yes?("Do you want to add support for email?"))
+
+  gem ''
+
+  gsub_file 'config/application.rb', '# require "action_mailer/railtie"', 'require "action_mailer/railtie"' 
+  empty_directory 'app/mailers'
+  copy_from_repo 'app/mailers/application_mailer.rb' 
+  gsub_file 'config/environments/development.rb', '# config.action_mailer.raise_delivery_errors = false', 'config.action_mailer.raise_delivery_errors = false'
+  gsub_file 'config/environments/development.rb', '# config.action_mailer.perform_caching = false', 'config.action_mailer.perform_caching = false'
+  gsub_file 'config/environments/production.rb', '# config.action_mailer.perform_caching = false', 'config.action_mailer.perform_caching = false'
+  # add production smarthost settings
+
+  email_dn = ask_default("What is your email domain name (leave empty for example.com)?", 'example.com') 
+  append_to_file '.env' do "
+MAILER_DOMAIN=#{email_dn}"
+  end
+
+  copy_from_repo "app/views/layouts/mailer.text.erb"
+  # update template
+  copy_from_repo "app/views/layouts/mailer.html.erb"
+
+  run 'bundle install'
+
+  commit "email"
+
+end
+
+if (net_support = yes?("Do you want to add basic networking tools?"))
+
+  gem 'net-ssh'
+  gem 'net-sftp'
+  gem 'net-telnet'
+
+  run 'bundle install'
+
+  commit "basic networking tools"
+
+end  
+
+if (reporting_support = yes?("Do you want to add basic reporting tools?"))
+
+  gem 'kaminari'
+  gem 'descriptive_statistics'
+  gem 'by_star'
+
+  run 'bundle install'
+
+  commit "basic reporting tools"
+
+end
+
+if (reporting_support = yes?("Do you need full ISO countries support and money, exchange rates information?"))
+
+  gem 'countries'
+  gem 'money'
+  gem 'money-open-exchange-rates'
+  gem 'money-rails', '~>1'
+  gem 'normalize_country'
+
+  copy_from_repo 'config/initializers/countries.rb'
+  copy_from_repo 'config/initializers/money.rb'
+  copy_from_repo 'app/models/concerns/has_exchange_rate.rb'
+  copy_from_repo 'app/models/open_exchange_rate.rb'
+  copy_from_repo 'app/models/country.rb'
+  copy_from_repo "db/migrate/create_countries.rb", {migration_ts: true} 
+  copy_from_repo "db/seeds/countries.rb"  
+  copy_from_repo "spec/factories/countries.rb"
+  copy_from_repo "spec/models/country_spec.rb"
+
+  currency = ask_default("What is your default currency code (leave empty for EUR)?", 'EUR')
+  oer_secret = ask_default("What is your Open Exchange Rates secret?", '')
+  append_to_file '.env' do "
+CURRENCY=#{currency}
+OPEN_EXCHANGE_RATE_SECRET=#{oer_secret}"
+  end
+
+  run 'bundle install'
+  run 'bundle exec rake db:seed:countries'
+
+  commit "countries, money and exchange rates support"
+
+end
+
+if (debug_support = yes?("Do you want application debug support (Rollbar & Newrelic)?"))
+  gem 'rollbar'
+  gem 'newrelic_rpm'
+
+  copy_from_repo 'config/initializers/rollbar.rb'
+  copy_from_repo 'config/newrelic.yml'
+
+  nr_app = ask_default("What is your New Relic application name (leave empty for app)?", 'app')
+  nr_key = ask_default("What is your New Relic key?", '')
+  rollbar_token = ask_default("What is your Rollbar token?", '')
+  append_to_file '.env' do "
+NEW_RELIC_KEY=#{nr_key}
+NEW_RELIC_APP_NAME=#{nr_app}  
+ROLLBAR_TOKEN=#{rollbar_token}"
+  end
+
+  run 'bundle install'
+
+  commit "application debug support"
+
+end
 
 
 

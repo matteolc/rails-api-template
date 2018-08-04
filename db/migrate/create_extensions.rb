@@ -1,4 +1,4 @@
-class CreateExtensions < ActiveRecord::Migration[5.1]
+class CreateExtensions < ActiveRecord::Migration[5.2]
     def change
         unless extension_enabled?('pgcrypto')
             execute 'create extension "pgcrypto"'

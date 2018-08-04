@@ -2,11 +2,12 @@
 
 class Api::V1::UserResource < Api::V1::ApiResource
     
-    VIRTUAL_ATTRIBUTES = %i[password_confirmation roles].freeze  
-
-    attributes *User.attribute_names.map(&:to_sym) -
-                %i[id] +
-                VIRTUAL_ATTRIBUTES
+    begin
+      attributes *User.attribute_names.map(&:to_sym) -
+                  %i[id] +
+                  %i[password password_confirmation roles]
+    rescue
+    end
 
     def self.fields
       super - [:password, :password_confirmation]
