@@ -109,6 +109,11 @@ gsub_file 'config/environments/development.rb', 'config.active_storage.service =
 gsub_file 'config/environments/development.rb', 'config.action_mailer.raise_delivery_errors = false', '# config.action_mailer.raise_delivery_errors = false'
 gsub_file 'config/environments/development.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
 
+# config/environments/test.rb 
+gsub_file 'config/environments/test.rb', 'config.active_storage.service = :test', '# config.active_storage.service = :test'
+gsub_file 'config/environments/test.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
+gsub_file 'config/environments/test.rb', 'config.action_mailer.delivery_method = :test', '# config.action_mailer.delivery_method = :test'
+
 # config/environments/production.rb
 gsub_file 'config/environments/production.rb', '# config.cache_store = :mem_cache_store', "config.cache_store = :dalli_store, 'localhost:11211', { :pool_size => ENV.fetch('WEB_CONCURRENCY') || 3  }"
 gsub_file 'config/environments/production.rb', 'config.active_storage.service = :local', '# config.active_storage.service = :local'
