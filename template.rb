@@ -331,9 +331,7 @@ REDIS_URL=redis://127.0.0.1:6379"
 
 end
 
-if (email_support = yes?("Do you want to add support for email?"))
-
-  gem ''
+if (email_support = yes?("Do you want to add support for email?"))  
 
   gsub_file 'config/application.rb', '# require "action_mailer/railtie"', 'require "action_mailer/railtie"' 
   empty_directory 'app/mailers'
@@ -408,6 +406,7 @@ OPEN_EXCHANGE_RATE_SECRET=#{oer_secret}"
   end
 
   run 'bundle install'
+  run 'bundle exec rake db:migrate'
   run 'bundle exec rake db:seed:countries'
 
   commit "countries, money and exchange rates support"
