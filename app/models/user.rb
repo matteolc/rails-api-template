@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-class User < ActiveRecord::Base
-  has_secure_password    
+class User < ActiveRecord::Base      
   include HasSecureTokens
+  include HasFulltextSearch
+
+  has_secure_password
   has_secure_tokens
-  rolify    
+  rolify      
 
   validates_uniqueness_of :email,
                           :username  

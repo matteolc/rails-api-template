@@ -250,8 +250,6 @@ end
 # Procfile
 create_file "Procfile", "web: bundle exec puma -C config/puma.rb" 
 
-commit "Creation"
-
 db_user = ask_default("Who is the database user (leave empty for dba)?", 'dba') 
 db_password = ask_default("What is the database password (leave empty for 12345678)?", '12345678')
 db_host = ask_default("Who is the database host (leave empty for localhost)?", 'localhost')
@@ -265,6 +263,9 @@ create_file '.env' do
 end
 
 append_to_file '.gitignore', '.env'
+append_to_file '.gitignore', '/vendor/bundle/*'
+
+commit "Creation"
 
 run 'bundle exec rake app:setup'
 
@@ -338,13 +339,15 @@ end
 
 if (email_support = yes?("Do you want to add support for email?"))  
 
+  # TODO: add css gem
+
   gsub_file 'config/application.rb', '# require "action_mailer/railtie"', 'require "action_mailer/railtie"' 
   empty_directory 'app/mailers'
   copy_from_repo 'app/mailers/application_mailer.rb' 
   gsub_file 'config/environments/development.rb', '# config.action_mailer.raise_delivery_errors = false', 'config.action_mailer.raise_delivery_errors = false'
   gsub_file 'config/environments/development.rb', '# config.action_mailer.perform_caching = false', 'config.action_mailer.perform_caching = false'
   gsub_file 'config/environments/production.rb', '# config.action_mailer.perform_caching = false', 'config.action_mailer.perform_caching = false'
-  # add production smarthost settings
+  # TODO: add production smarthost settings
 
   email_dn = ask_default("What is your email domain name (leave empty for example.com)?", 'example.com') 
   append_to_file '.env' do "
@@ -352,7 +355,7 @@ MAILER_DOMAIN=#{email_dn}"
   end
 
   copy_from_repo "app/views/layouts/mailer.text.erb"
-  # update template
+  # TODO: update template for css
   copy_from_repo "app/views/layouts/mailer.html.erb"
 
   run 'bundle install'
