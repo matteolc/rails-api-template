@@ -39,7 +39,7 @@ gem_group :development, :test do
   gem 'pry-rails'
 end
 gem 'jsonapi-resources'
-gem 'jsonapi-authorization', git: 'https://github.com/venuu/jsonapi-authorization.git'
+gem 'jsonapi-authorization', github: 'matteolc/jsonapi-authorization'
 gem 'dalli'
 gem 'connection_pool'
 gem 'dotenv-rails'

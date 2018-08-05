@@ -1,28 +1,36 @@
 # Rails-API-Template
-This template creates a Ruby on Rails API application.
+This template creates a Ruby on Rails API application with the following features:
 
-## Backend
-
-+ Standard JSON-API server using [JSON API Resources](http://jsonapi-resources.com)
++ Standard JSON API server using [JSON API Resources](http://jsonapi-resources.com)
 + Use `UUID` instead of integer IDs by default in migrations
 + Standard `has_secure_password` extension used for storing user passwords
-+ Multiple roles available per user, backed by [Rolify](https://github.com/RolifyCommunity/rolify)
++ Multiple roles available per user backed by [Rolify](https://github.com/RolifyCommunity/rolify)
 + Authorization of REST actions backed by [Pundit](https://github.com/elabs/pundit)
++ Use `memcached` as underlying cache store
 + Custom `has_secure_tokens` extension used in conjuction with [JSON Web Tokens](https://jwt.io/) for managing and verifying user tokens
 + An `authorization` controller concern and a `sessions_controller` to handle JWT authentication and authorization
 + A `registrations_controller` to handle user registrations
-+ Easy `has_fulltext_search` extension backed by [PGSearch](https://github.com/Casecommons/pg_search) used to leverage PostgreSQL’s full text search
-+ Integration of client full-text search with JSONAPI-Resources
-+ Provide a production ready Puma configuration
-+ Provide a template for [Rollbar](https://rollbar.com) reporting (should be used in production only)
-+ Provides connection to New Relic
-+ Uses Memcached as underlying cache store
++ A `has_fulltext_search` extension backed by [PGSearch](https://github.com/Casecommons/pg_search) used to leverage PostgreSQL’s full text search
++ A production ready Puma configuration
++ Rspec and FactoryBot for testing
++ A template for [Rollbar](https://rollbar.com) exception monitoring (should be used in production only)
++ A template for [New Relic](https://www.newrelic.com) application monitoring
+
+Included support for (to be documented):
+
++ Excel
++ PDF
++ Background jobs & scheduling
++ Email
++ Networking tools
++ Reporting tools
++ ISO-compliant countries and exchange-rates information
 
 # Requirements
 
-+ **Ruby** 2.4.2
-+ **Rails** 5.2.1
-+ **Postgresql** 9.6
++ **Ruby** 2.4
++ **Rails** 5.2
++ **Postgresql** At least v9
 + **Memcached**
 
 # Usage
@@ -32,7 +40,6 @@ gem install \
     bundler \
     rails \
     foreman \
-    thor \
     --no-rdoc \
     --no-ri
 ```
@@ -46,5 +53,6 @@ rails new myapi \
 
 ```
 cd myapi
+rspec
 foreman start
 ```               

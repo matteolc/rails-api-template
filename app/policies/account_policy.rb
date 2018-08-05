@@ -7,19 +7,19 @@ class AccountPolicy < ApplicationPolicy
   def show?
     user.id === record.id ?
       true :
-      raise Pundit::NotAuthorizedError
+      raise(Pundit::NotAuthorizedError)
   end
 
   def update?
     user.id === record.id ?
       true :
-      raise Pundit::NotAuthorizedError
+      raise(Pundit::NotAuthorizedError)
   end
 
   def destroy?
     user.id === record.id ?
       true :
-      raise Pundit::NotAuthorizedError
+      raise(Pundit::NotAuthorizedError)
   end
  
 end

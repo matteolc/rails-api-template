@@ -16,8 +16,9 @@ class CountryPolicy < ApplicationPolicy
     end
   
     def update?
-      raise Pundit::NotAuthorizedError unless user
-      true
+      user.has_any_role?(:admin) ?
+        true :
+        (raise Pundit::NotAuthorizedError)
     end
   
     def destroy?
