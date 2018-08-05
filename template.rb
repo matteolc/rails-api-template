@@ -401,6 +401,9 @@ if (reporting_support = yes?("Do you need full ISO countries support and money, 
   copy_from_repo 'app/models/concerns/has_exchange_rate.rb'
   copy_from_repo 'app/models/open_exchange_rate.rb'
   copy_from_repo 'app/models/country.rb'
+  copy_from_repo 'app/controllers/api/v1/countries_controller.rb'
+  copy_from_repo 'app/resources/api/v1/country_resource.rb'
+  copy_from_repo 'app/policies/country_policy.rb'
   copy_from_repo "db/migrate/create_countries.rb", {migration_ts: true} 
   copy_from_repo "db/seeds/countries.rb"  
   copy_from_repo "spec/factories/countries.rb"
@@ -416,6 +419,10 @@ OPEN_EXCHANGE_RATE_SECRET=#{oer_secret}"
   run 'bundle install'
   run 'bundle exec rake db:migrate'
   run 'bundle exec rake db:seed:countries'
+
+  insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do "
+    jsonapi_resources :countries"
+  end   
 
   commit "countries, money and exchange rates support"
 
