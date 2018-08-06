@@ -87,6 +87,21 @@ class Country < ApplicationRecord
     def self.find_in_cache(id)
       Rails.cache.fetch(["Country", id], expires_in: 1.day) do find(id) end
     end
+
+    def to_pdf
+      pdf = WickedPdf.new.pdf_from_string(
+        ActionController::Base.new.render_to_string('pdf/country.html', layout: 'layouts/pdf.html', locals: { country: self }),
+        margin: { 
+          top: 10,
+          bottom: 10,
+          left: 10,
+          right: 10 
+        },
+        footer: { center: '[page] of [topage]' })
+      save_path = Rails.root.join('tmp', "#{name}.pdf")
+      File.open(save_path, 'wb') do |file| file << pdf end
+      save_path
+    end    
   
   end
   

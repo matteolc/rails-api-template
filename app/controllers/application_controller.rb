@@ -10,9 +10,9 @@ class ApplicationController < ActionController::API
 
     protected
   
-    def render_error(message, status)
+    def render_error(message, status = :bad_request)
         Rails.logger.warn { message }
-        render json: { errors: [{ detail: message }] }, status: status || :bad_request
+        render json: { errors: [{ detail: message }] }, status: status 
     end
 
 end

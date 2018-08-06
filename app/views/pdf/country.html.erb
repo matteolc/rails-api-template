@@ -1,0 +1,10 @@
+<div>
+  <h5><%= country.name %></h5>
+  <p>
+    <% Country.column_names.each do |column_name| %>
+        <strong><%= column_name %>:</strong>
+        <%= country.send(column_name) %>
+        <br />
+    <% end %>
+  </p>
+</div>

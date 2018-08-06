@@ -28,9 +28,8 @@ Included support for (to be documented):
 
 # Requirements
 
-+ **Ruby** 2.4
-+ **Rails** 5.2
-+ **Postgresql** At least v9
++ **Ruby**
++ **PostgreSQL**
 + **Memcached**
 
 # Usage
