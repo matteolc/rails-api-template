@@ -401,6 +401,7 @@ if (reporting_support = yes?("Do you need full ISO countries support and money, 
   copy_from_repo 'app/models/concerns/has_exchange_rate.rb'
   copy_from_repo 'app/models/open_exchange_rate.rb'
   copy_from_repo 'app/models/country.rb'
+  copy_from_repo 'app/views/pdf/country.html.erb'
   copy_from_repo 'app/controllers/api/v1/countries_controller.rb'
   copy_from_repo 'app/resources/api/v1/country_resource.rb'
   copy_from_repo 'app/policies/country_policy.rb'
