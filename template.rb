@@ -44,6 +44,7 @@ gem 'dalli'
 gem 'connection_pool'
 gem 'dotenv-rails'
 gem 'default_value_for'
+gem 'by_star'
 gem 'jwt'
 gem 'pg_search'
 gem 'jsonb_accessor', '~> 1.0.0'
@@ -380,7 +381,6 @@ if (reporting_support = yes?("Do you want to add basic reporting tools?"))
 
   gem 'kaminari'
   gem 'descriptive_statistics'
-  gem 'by_star'
 
   run 'bundle install'
 
@@ -401,6 +401,7 @@ if (reporting_support = yes?("Do you need full ISO countries support and money, 
   copy_from_repo 'app/models/concerns/has_exchange_rate.rb'
   copy_from_repo 'app/models/open_exchange_rate.rb'
   copy_from_repo 'app/models/country.rb'
+  # should be conditional to PDF support
   copy_from_repo 'app/views/pdf/country.html.erb'
   copy_from_repo 'app/controllers/api/v1/countries_controller.rb'
   copy_from_repo 'app/resources/api/v1/country_resource.rb'

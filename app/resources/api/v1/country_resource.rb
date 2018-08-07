@@ -13,7 +13,15 @@ class Api::V1::CountryResource < Api::V1::ApiResource
     begin
         filters *Country.attribute_names.map(&:to_sym)
     rescue
-    end    
+    end   
+    
+    filter :updated_at_geq, apply: ->(records, value, _options) {
+        records.after(value)
+    }
+      
+    filter :updated_at_leq, apply: ->(records, value, _options) {
+        records.before(value)
+    }    
        
 end
   

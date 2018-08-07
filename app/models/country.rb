@@ -33,6 +33,8 @@
 class Country < ApplicationRecord
     include HasFulltextSearch
     include SpreadsheetArchitect
+
+    by_star_field :updated_at
   
     validates_uniqueness_of :name,
                             case_sensitive: false
