@@ -443,6 +443,7 @@ OPEN_EXCHANGE_RATE_SECRET=#{oer_secret}"
       UpdateExchangeRatesJob.perform_later
     end    
   end"  
+  end
 
   commit "countries, money and exchange rates support"
 
