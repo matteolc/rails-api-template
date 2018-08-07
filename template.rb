@@ -334,6 +334,10 @@ REDIS_URL=redis://127.0.0.1:6379"
 
   run 'bundle install'
 
+  append_to_file 'Procfile' do "
+job: bundle exec sidekiq -C config/sidekiq.yml    
+    "    
+
   commit "jobs & scheduler"
 
 end
@@ -388,7 +392,7 @@ if (reporting_support = yes?("Do you want to add basic reporting tools?"))
 
 end
 
-if (reporting_support = yes?("Do you need full ISO countries support and money, exchange rates information?"))
+if (country_support = yes?("Do you need full ISO countries support and money, exchange rates information?"))
 
   gem 'countries'
   gem 'money'
@@ -398,8 +402,10 @@ if (reporting_support = yes?("Do you need full ISO countries support and money, 
 
   copy_from_repo 'config/initializers/countries.rb'
   copy_from_repo 'config/initializers/money.rb'
-  copy_from_repo 'app/models/concerns/has_exchange_rate.rb'
+  copy_from_repo 'app/models/concerns/has_exchange_rate.rb'  
   copy_from_repo 'app/models/open_exchange_rate.rb'
+  # should be conditional to background processing
+  copy_from_repo 'app/jobs/update_exchange_rates_job.rb'
   copy_from_repo 'app/models/country.rb'
   # should be conditional to PDF support
   copy_from_repo 'app/views/pdf/country.html.erb'
@@ -425,6 +431,18 @@ OPEN_EXCHANGE_RATE_SECRET=#{oer_secret}"
   insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do "
     jsonapi_resources :countries"
   end   
+
+  # should be conditional to background processing
+  insert_into_file "config/routes.rb", after: "ActiveRecord::Base.establish_connection if defined?(ActiveRecord)" do "
+  # Only create scheduler on first worker thread
+  if worker_number === 0
+    Rails.logger.info 'Initializing Scheduler..'
+    @rufus_scheduler = Rufus::Scheduler.new
+    # Setup scheduled jobs
+    @rufus_scheduler.every '12h' do
+      UpdateExchangeRatesJob.perform_later
+    end    
+  end"  
 
   commit "countries, money and exchange rates support"
 
