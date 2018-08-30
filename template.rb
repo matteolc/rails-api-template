@@ -335,8 +335,8 @@ REDIS_URL=redis://127.0.0.1:6379"
   run 'bundle install'
 
   append_to_file 'Procfile' do "
-job: bundle exec sidekiq -C config/sidekiq.yml    
-    "    
+job: bundle exec sidekiq -C config/sidekiq.yml" 
+  end  
 
   commit "jobs & scheduler"
 
