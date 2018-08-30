@@ -97,28 +97,39 @@ copy_from_repo 'spec/models/user_spec.rb'
 # config
 application "config.active_record.default_timezone = :utc" 
 application "config.active_record.schema_format = :sql"
-gsub_file 'config/application.rb', 'require "active_job/railtie"', '# require "active_job/railtie"'
-gsub_file 'config/application.rb', 'require "active_storage/engine"', '# require "active_storage/engine"'
-gsub_file 'config/application.rb', 'require "action_mailer/railtie"', '# require "action_mailer/railtie"'
-gsub_file 'config/application.rb', 'require "action_view/railtie"', '# require "action_view/railtie"'
-gsub_file 'config/application.rb', 'require "action_cable/engine"', '# require "action_cable/engine"'
+# gsub_file 'config/application.rb', 'require "active_job/railtie"', '# require "active_job/railtie"'
+# gsub_file 'config/application.rb', 'require "active_storage/engine"', '# require "active_storage/engine"'
+# gsub_file 'config/application.rb', 'require "action_mailer/railtie"', '# require "action_mailer/railtie"'
+# gsub_file 'config/application.rb', 'require "action_view/railtie"', '# require "action_view/railtie"'
+# gsub_file 'config/application.rb', 'require "action_cable/engine"', '# require "action_cable/engine"'
+comment_lines 'config/application.rb', /active_job/ 
+comment_lines 'config/application.rb', /active_storage/
+comment_lines 'config/application.rb', /action_mailer/
+comment_lines 'config/application.rb', /action_view/
+comment_lines 'config/application.rb', /action_cable/
 copy_from_repo "config/puma.rb"
 
-# config/environments/development.rb
+# config/environments
 gsub_file 'config/environments/development.rb', ':memory_store', ":dalli_store, 'localhost:11211', { :pool_size => ENV.fetch('WEB_CONCURRENCY') || 3  }"
-gsub_file 'config/environments/development.rb', 'config.active_storage.service = :local', '# config.active_storage.service = :local'
-gsub_file 'config/environments/development.rb', 'config.action_mailer.raise_delivery_errors = false', '# config.action_mailer.raise_delivery_errors = false'
-gsub_file 'config/environments/development.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
+gsub_file 'config/environments/production.rb', '# config.cache_store = :mem_cache_store', "config.cache_store = :dalli_store, 'localhost:11211', { :pool_size => ENV.fetch('WEB_CONCURRENCY') || 3  }"
+
+#gsub_file 'config/environments/development.rb', 'config.active_storage.service = :local', '# config.active_storage.service = :local'
+#gsub_file 'config/environments/development.rb', 'config.action_mailer.raise_delivery_errors = false', '# config.action_mailer.raise_delivery_errors = false'
+#gsub_file 'config/environments/development.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
 
 # config/environments/test.rb 
-gsub_file 'config/environments/test.rb', 'config.active_storage.service = :test', '# config.active_storage.service = :test'
-gsub_file 'config/environments/test.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
-gsub_file 'config/environments/test.rb', 'config.action_mailer.delivery_method = :test', '# config.action_mailer.delivery_method = :test'
+#gsub_file 'config/environments/test.rb', 'config.active_storage.service = :test', '# config.active_storage.service = :test'
+#gsub_file 'config/environments/test.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
+#gsub_file 'config/environments/test.rb', 'config.action_mailer.delivery_method = :test', '# config.action_mailer.delivery_method = :test'
 
 # config/environments/production.rb
-gsub_file 'config/environments/production.rb', '# config.cache_store = :mem_cache_store', "config.cache_store = :dalli_store, 'localhost:11211', { :pool_size => ENV.fetch('WEB_CONCURRENCY') || 3  }"
-gsub_file 'config/environments/production.rb', 'config.active_storage.service = :local', '# config.active_storage.service = :local'
-gsub_file 'config/environments/production.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
+#gsub_file 'config/environments/production.rb', 'config.active_storage.service = :local', '# config.active_storage.service = :local'
+#gsub_file 'config/environments/production.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
+
+%w(development test production).each do |env|
+  comment_lines "config/environments/#{env}.rb", /active_storage/
+  comment_lines "config/environments/#{env}.rb", /action_mailer/
+end
 
 # config/database.yml
 prepend_to_file 'config/database.yml' do 
@@ -304,7 +315,8 @@ if (pdf_support = yes?("Do you want to add support for PDF?"))
     get 'print/:id', to: 'pdf#print'"
   end  
 
-  gsub_file 'config/application.rb', '# require "action_view/railtie"', 'require "action_view/railtie"' 
+  # gsub_file 'config/application.rb', '# require "action_view/railtie"', 'require "action_view/railtie"' 
+  uncomment_lines 'config/application.rb', /action_view/  
   empty_directory 'app/views/layouts'
   copy_from_repo "app/views/layouts/pdf.html.erb"  
 
@@ -323,7 +335,8 @@ if (bj_support = yes?("Do you want to add support for background jobs and schedu
   copy_from_repo "config/initializers/redis.rb"
   copy_from_repo "config/initializers/sidekiq.rb"
 
-  gsub_file 'config/application.rb', '# require "active_job/railtie"', 'require "active_job/railtie"' 
+  # gsub_file 'config/application.rb', '# require "active_job/railtie"', 'require "active_job/railtie"' 
+  uncomment_lines 'config/application.rb', /active_job/  
   application "config.active_job.queue_adapter = :sidekiq"
   empty_directory 'app/jobs'
   copy_from_repo "app/jobs/application_job.rb"
@@ -344,23 +357,46 @@ end
 
 if (email_support = yes?("Do you want to add support for email?"))  
 
-  # TODO: add css gem
+  gem 'premailer-rails'
 
-  gsub_file 'config/application.rb', '# require "action_mailer/railtie"', 'require "action_mailer/railtie"' 
+  # gsub_file 'config/application.rb', '# require "action_mailer/railtie"', 'require "action_mailer/railtie"' 
+  uncomment_lines 'config/application.rb', /action_mailer/ 
   empty_directory 'app/mailers'
   copy_from_repo 'app/mailers/application_mailer.rb' 
-  gsub_file 'config/environments/development.rb', '# config.action_mailer.raise_delivery_errors = false', 'config.action_mailer.raise_delivery_errors = false'
-  gsub_file 'config/environments/development.rb', '# config.action_mailer.perform_caching = false', 'config.action_mailer.perform_caching = false'
-  gsub_file 'config/environments/production.rb', '# config.action_mailer.perform_caching = false', 'config.action_mailer.perform_caching = false'
-  # TODO: add production smarthost settings
+  %w(development test production).each do |env|
+    uncomment_lines "config/environments/#{env}.rb", /action_mailer/
+  end  
+  insert_into_file "config/environments/production.rb", after: "config.action_mailer.raise_delivery_errors = false" do "
+    config.action_mailer.default_url_options = { host: ENV['MAILER_DOMAIN'] }
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.perform_deliveries = true
+    config.action_mailer.raise_delivery_errors = true
+    config.action_mailer.default :charset => 'utf-8'  
+  
+    config.action_mailer.smtp_settings = {
+      address: ENV['SMARTHOST'],
+      port: 587,
+      enable_starttls_auto: true,
+      user_name: ENV['SMARTHOST_USER'],
+      password: ENV['SMARTHOST_PASSWORD'],
+      domain: ENV['MAILER_DOMAIN'],
+      authentication: 'plain',
+      openssl_verify_mode: 'none'
+    }"
+  end 
 
   email_dn = ask_default("What is your email domain name (leave empty for example.com)?", 'example.com') 
+  smarthost = ask_default("What is the address of your smarthost?", 'smtp.sendgrid.net') 
+  sm_user = ask_default("What is the username of your account on the smarthost?", 'example') 
+  sm_pass = ask_default("What is the password of your account on the smarthost?", '123') 
   append_to_file '.env' do "
-MAILER_DOMAIN=#{email_dn}"
-  end
+MAILER_DOMAIN=#{email_dn}
+SMARTHOST=#{smarthost}
+SMARTHOST_USER=#{sm_user}
+SMARTHOST_PASSWORD=#{sm_pass}"
+  end  
 
   copy_from_repo "app/views/layouts/mailer.text.erb"
-  # TODO: update template for css
   copy_from_repo "app/views/layouts/mailer.html.erb"
 
   run 'bundle install'
@@ -407,6 +443,8 @@ if (country_support = yes?("Do you need full ISO countries support and money, ex
   # should be conditional to background processing
   copy_from_repo 'app/jobs/update_exchange_rates_job.rb'
   copy_from_repo 'app/models/country.rb'
+  copy_from_repo "app/mailers/country_mailer.rb"
+  copy_from_repo "app/views/country_mailer/email.html.erb"
   # should be conditional to PDF support
   copy_from_repo 'app/views/pdf/country.html.erb'
   copy_from_repo 'app/controllers/api/v1/countries_controller.rb'
@@ -424,6 +462,7 @@ CURRENCY=#{currency}
 OPEN_EXCHANGE_RATE_SECRET=#{oer_secret}"
   end
 
+  run 'bundle update'
   run 'bundle install'
   run 'bundle exec rake db:migrate'
   run 'bundle exec rake db:seed:countries'

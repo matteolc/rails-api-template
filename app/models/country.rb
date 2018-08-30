@@ -33,6 +33,7 @@
 class Country < ApplicationRecord
     include HasFulltextSearch
     include SpreadsheetArchitect
+    include HasExchangeRate
 
     by_star_field :updated_at
   
@@ -99,7 +100,7 @@ class Country < ApplicationRecord
           left: 10,
           right: 10 
         },
-        footer: { center: '[page] of [topage]' })
+        footer: { center: 'Page [page]/[topage]' })
       save_path = Rails.root.join('tmp', "#{name}.pdf")
       File.open(save_path, 'wb') do |file| file << pdf end
       save_path

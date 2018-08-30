@@ -6,7 +6,8 @@ class Api::V1::CountryResource < Api::V1::ApiResource
 
     begin
         attributes *Country.attribute_names.map(&:to_sym) -
-                    %i[id]                
+                    %i[id] +
+                    %i[effective_exchange_rate]                 
     rescue
     end                
   
@@ -21,7 +22,11 @@ class Api::V1::CountryResource < Api::V1::ApiResource
       
     filter :updated_at_leq, apply: ->(records, value, _options) {
         records.before(value)
-    }    
+    }  
+
+    # no-op on virtual attributes
+    def effective_exchange_rate=(_)
+    end    
        
 end
   

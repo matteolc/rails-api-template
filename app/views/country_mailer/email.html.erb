@@ -1,10 +1,12 @@
+<%= @body %>
+
 <div class="mui-panel">
   <div class="mui--text-headline">
-    <%= country.name %>
+    <%= @country.name %>
   </div>
       <% Country.column_names.each do |column_name| %>
           <strong><%= column_name %></strong>
-          <%= country.send(column_name) %>
+          <%= @country.send(column_name) %>
           <div class="mui-divider"></div>       
       <% end %>
 </div>

@@ -34,9 +34,10 @@ class OpenExchangeRate
 
   def self.get_exchange_rate(from_currency_code, to_currency_code)
     exchange_rate_usd = get_exchange_rate_usd(to_currency_code)
-    return exchange_rate_usd if from_currency_code === 'USD'
     exchange_rate_from = get_exchange_rate_usd(from_currency_code)
-    return nil unless exchange_rate_from || exchange_rate_from == 'Unknown Currency'
+    return nil if exchange_rate_usd === 'Unknown Currency'
+    return nil if exchange_rate_from == 'Unknown Currency'
+    return exchange_rate_usd if from_currency_code === 'USD'        
     exchange_rate_usd / exchange_rate_from
   end
 
