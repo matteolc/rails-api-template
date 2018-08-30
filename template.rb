@@ -431,8 +431,7 @@ OPEN_EXCHANGE_RATE_SECRET=#{oer_secret}"
   insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do "
     jsonapi_resources :countries"
   end   
-
-  # should be conditional to background processing
+  
   insert_into_file "config/routes.rb", after: "ActiveRecord::Base.establish_connection if defined?(ActiveRecord)" do "
   # Only create scheduler on first worker thread
   if worker_number === 0
