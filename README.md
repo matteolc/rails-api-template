@@ -16,7 +16,7 @@ This template creates a Ruby on Rails API application with the following feature
 + A template for [Rollbar](https://rollbar.com) exception monitoring (should be used in production only)
 + A template for [New Relic](https://www.newrelic.com) application monitoring
 
-Included support for (to be documented):
+Included support for (TBD):
 
 + Excel
 + PDF

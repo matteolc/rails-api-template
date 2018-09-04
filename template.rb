@@ -98,11 +98,6 @@ copy_from_repo 'spec/models/user_spec.rb'
 # config
 application "config.active_record.default_timezone = :utc" 
 application "config.active_record.schema_format = :sql"
-# gsub_file 'config/application.rb', 'require "active_job/railtie"', '# require "active_job/railtie"'
-# gsub_file 'config/application.rb', 'require "active_storage/engine"', '# require "active_storage/engine"'
-# gsub_file 'config/application.rb', 'require "action_mailer/railtie"', '# require "action_mailer/railtie"'
-# gsub_file 'config/application.rb', 'require "action_view/railtie"', '# require "action_view/railtie"'
-# gsub_file 'config/application.rb', 'require "action_cable/engine"', '# require "action_cable/engine"'
 comment_lines 'config/application.rb', /active_job/ 
 comment_lines 'config/application.rb', /active_storage/
 comment_lines 'config/application.rb', /action_mailer/
@@ -113,19 +108,6 @@ copy_from_repo "config/puma.rb"
 # config/environments
 gsub_file 'config/environments/development.rb', ':memory_store', ":dalli_store, 'localhost:11211', { :pool_size => ENV.fetch('WEB_CONCURRENCY') || 3  }"
 gsub_file 'config/environments/production.rb', '# config.cache_store = :mem_cache_store', "config.cache_store = :dalli_store, 'localhost:11211', { :pool_size => ENV.fetch('WEB_CONCURRENCY') || 3  }"
-
-#gsub_file 'config/environments/development.rb', 'config.active_storage.service = :local', '# config.active_storage.service = :local'
-#gsub_file 'config/environments/development.rb', 'config.action_mailer.raise_delivery_errors = false', '# config.action_mailer.raise_delivery_errors = false'
-#gsub_file 'config/environments/development.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
-
-# config/environments/test.rb 
-#gsub_file 'config/environments/test.rb', 'config.active_storage.service = :test', '# config.active_storage.service = :test'
-#gsub_file 'config/environments/test.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
-#gsub_file 'config/environments/test.rb', 'config.action_mailer.delivery_method = :test', '# config.action_mailer.delivery_method = :test'
-
-# config/environments/production.rb
-#gsub_file 'config/environments/production.rb', 'config.active_storage.service = :local', '# config.active_storage.service = :local'
-#gsub_file 'config/environments/production.rb', 'config.action_mailer.perform_caching = false', '# config.action_mailer.perform_caching = false'
 
 %w(development test production).each do |env|
   comment_lines "config/environments/#{env}.rb", /active_storage/
@@ -316,7 +298,6 @@ if (pdf_support = yes?("Do you want to add support for PDF?"))
     get 'print/:id', to: 'pdf#print'"
   end  
 
-  # gsub_file 'config/application.rb', '# require "action_view/railtie"', 'require "action_view/railtie"' 
   uncomment_lines 'config/application.rb', /action_view/  
   empty_directory 'app/views/layouts'
   copy_from_repo "app/views/layouts/pdf.html.erb"  
@@ -336,7 +317,6 @@ if (bj_support = yes?("Do you want to add support for background jobs and schedu
   copy_from_repo "config/initializers/redis.rb"
   copy_from_repo "config/initializers/sidekiq.rb"
 
-  # gsub_file 'config/application.rb', '# require "active_job/railtie"', 'require "active_job/railtie"' 
   uncomment_lines 'config/application.rb', /active_job/  
   application "config.active_job.queue_adapter = :sidekiq"
   empty_directory 'app/jobs'
@@ -360,7 +340,6 @@ if (email_support = yes?("Do you want to add support for email?"))
 
   gem 'premailer-rails'
 
-  # gsub_file 'config/application.rb', '# require "action_mailer/railtie"', 'require "action_mailer/railtie"' 
   uncomment_lines 'config/application.rb', /action_mailer/ 
   empty_directory 'app/mailers'
   copy_from_repo 'app/mailers/application_mailer.rb' 
