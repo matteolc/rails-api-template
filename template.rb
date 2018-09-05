@@ -276,9 +276,12 @@ if (excel_support = yes?("Do you want to add support for Excel?"))
   empty_directory 'app/models/concerns/acts_as_spreadsheet'
   copy_from_repo "app/models/concerns/acts_as_spreadsheet/spreadsheet.rb"
   copy_from_repo "app/controllers/api/v1/excel_controller.rb"
+  copy_from_repo "app/jobs/excel_uploader_job.rb"
+  copy_from_repo "app/models/excel_uploader/default.rb"
 
   insert_into_file "config/routes.rb", after: "jsonapi_resources :users" do "
-    get 'download', to: 'excel#download'"
+    get 'download', to: 'excel#download'
+    put 'upload', to: 'excel#upload'"
   end    
 
   run 'bundle install'

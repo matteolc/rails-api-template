@@ -14,6 +14,39 @@ class Api::V1::ExcelController < ApplicationController
     render_error e.message
   end
 
+  def upload
+    args = {
+        partial: ActiveModel::Type::Boolean.new.cast(params[:partial]),
+        file: uploaded_file_path,
+        resource: params[:resource],
+        unique_key: params[:unique_key],
+    }         
+  if ActiveModel::Type::Boolean.new.cast(params[:delayed])
+    if ExcelUploaderJob.perform_later(args)
+        render json: { 
+            message: 'Rows are being imported..',
+        }, status: :ok
+    else             
+      render_error "Error starting job"
+    end
+  else
+    begin
+      uploader = ExcelUploader::Default.new(args)
+      if uploader.save
+        render json: { 
+            message: "Rows have been imported", 
+        }, status: :ok
+      else
+        render_error "#{uploader.errors.count} errors prevented us from importing your spreadsheet. 
+        Please update your spreadsheet and try again. 
+        #{uploader.errors.full_messages.join(', ')}"
+      end
+    rescue => e
+      render_error e.message
+    end            
+  end
+end    
+
   private
 
   # params[:resource] the model name we want to download records from
@@ -58,5 +91,12 @@ class Api::V1::ExcelController < ApplicationController
     { updated_at: Chronic.parse(filter[:updated_at_geq])..Chronic.parse(filter[:updated_at_leq]) }
     : "1=1"
   end 
+
+  def uploaded_file_path(file=params[:file])
+    file_path = File.join("tmp", 
+                          file.original_filename)
+    File.open(file_path, "wb"){ |f| f.write(IO.read file.tempfile.path) }
+    file_path     
+  end     
 
 end
