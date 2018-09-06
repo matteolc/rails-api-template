@@ -58,14 +58,14 @@ foreman start
 
 ## Authentication
 
-Authentication is performed using JSON Web Tokens. JSON Web Tokens are an open, industry standard [https://tools.ietf.org/html/rfc7519](RFC 7519) method for representing claims securely between two parties. When the user successfully logs in using their credentials, a JSON Web Token will be returned, which should be kept by clients in
+Authentication is performed using JSON Web Tokens. JSON Web Tokens are an open, industry standard [RFC 7519](https://tools.ietf.org/html/rfc7519) method for representing claims securely between two parties. When the user successfully logs in using their credentials, a JSON Web Token will be returned, which should be kept by clients in
 local storage (no cookies):
 
 ```
 "token":"eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MzYyMjU5NDUsImV4cCI6MTUzNjMxMjM0NSwic3ViIjoiMzdjMDY2ZjgtNDhjMS00NDZjLTk4OGQtYzQ0ZDQ4MDJiNzZmIiwicm9sZXMiOlsiYWRtaW4iXX0.UwqjX27pGJHJoGjCMkLhBnwoszb9d590upnkRFM0LaA"}
 ```
 
-The above token [https://jwt.io/](decodes) to:
+The above token [decodes](https://jwt.io/) to:
 
 ```
 {
