@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
   # Find a user in the cache with matching 
   # id and token
   def self.find_in_cache(id, token)
-    Rails.cache.fetch(["User", id, token], expires_in: 1.hour) do 
+    Rails.cache.fetch(["User", id, token], expires_in: 5.minutes) do 
       where('id = ? and tokens like ?', id, "%#{token}%").first 
     end
   end                           

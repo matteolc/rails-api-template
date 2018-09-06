@@ -5,7 +5,7 @@ This template creates a Ruby on Rails API application with the following feature
 + Use `UUID` instead of integer IDs by default in migrations
 + Standard `has_secure_password` extension used for storing user passwords
 + Multiple roles available per user backed by [Rolify](https://github.com/RolifyCommunity/rolify)
-+ Authorization of REST actions backed by [Pundit](https://github.com/elabs/pundit)
++ Authorization of REST actions backed by [Pundit](https://github.com/elabs/pundit) and [JSON API Authorization](https://github.com/matteolc/jsonapi-authorization)
 + Use `memcached` as underlying cache store
 + Custom `has_secure_tokens` extension used in conjuction with [JSON Web Tokens](https://jwt.io/) for managing and verifying user tokens
 + An `authorization` controller concern and a `sessions_controller` to handle JWT authentication and authorization
@@ -79,6 +79,9 @@ The above token [decodes](https://jwt.io/) to:
 }
 ```
 
+**Note** Since there is no session information and every call to the REST API requires authentication, caching is used to improve performance and avoid
+excessive hits to the database. Upon login the user is cached with an expiration time of 5 minutes.
+
 Whenever the user wants to access a protected route or resource, the user agent should send the JWT in the Authorization header using the Bearer schema: 
 
 `Authorization: Bearer <token>`
@@ -125,9 +128,23 @@ This claim contains the `UUID` of the user.
 
 This custom claim contains the (names of the) roles assigned to the user.
 
+### Other Custom Claims
+
+You can add more custom claims if required by your client application. To do so, add your custom claims to the hash passed to the `JsonWebToken.new.encode` call
+in `generate_token` (`app/models/concerns/has_secure_token.rb`).
+
 ## Authorization
 
+Roles based authorization is performed with:
+
++ [Rolify](https://github.com/RolifyCommunity/rolify) Allows the assignment of multiple user roles, see `app/models/role`.
++ [Pundit](https://github.com/elabs/pundit) Allows authorization of each REST action, see `app/policies`.
++ [JSON API Authorization](https://github.com/matteolc/jsonapi-authorization) Authorization plug for [JSON API Resources](http://jsonapi-resources.com)
+with caching support.
+
 ## JSON API
+
+A standard JSON API server is exposed using [JSON API Resources](http://jsonapi-resources.com)
 
 ## Caching
 
