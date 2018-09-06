@@ -14,9 +14,7 @@ module HasSecureTokens
     
     def generate_token        
         token = JsonWebToken.new.encode({
-            username: username,
-            csrf_token: SecureRandom.base64(32),
-            iat: Time.now.utc,
+            iat: Time.now.to_i,
             exp: 1.weeks.from_now.to_i,
             sub: id,
             roles: roles.map(&:name)

@@ -12,18 +12,18 @@ module Authorization
   
     def authenticate_user!
       if has_authorization?
-        if jwt_claims && jwt_claims['username'] && (user = User.find_in_cache(jwt_claims['username'], token))
+        if jwt_claims && jwt_claims['sub'] && (user = User.find_in_cache(jwt_claims['sub'], token))
           if valid_authenticity_token?(user)
             @current_user = user
             @current_token = token
           else
-            render json: { errors: [{ detail: 'Invalid authorization token' }] }, status: :unauthorized
+            render_error 'Invalid authorization token', :unauthorized
           end
         else
-          render json: { errors: [{ detail: 'Invalid credentials' }] }, status: :unauthorized
+          render_error 'Invalid credentials', :unauthorized
           end
       else
-        render json: { errors: [{ detail: 'No authorization credentials received' }] }, status: :bad_request
+        render_error 'No authorization credentials received'
       end
     end
   
@@ -49,6 +49,12 @@ module Authorization
   
     def jwt_claims
       JsonWebToken.new.decode(token)
+    rescue JWT::ExpiredSignature
+      nil
+    rescue JWT::InvalidIatError
+      nil
+    rescue JWT::InvalidSubError
+      nil
     rescue StandardError
       nil
     end
