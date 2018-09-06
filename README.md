@@ -59,10 +59,24 @@ foreman start
 ## Authentication
 
 Authentication is performed using JSON Web Tokens. JSON Web Tokens are an open, industry standard [https://tools.ietf.org/html/rfc7519](RFC 7519) method for representing claims securely between two parties. When the user successfully logs in using their credentials, a JSON Web Token will be returned, which should be kept by clients in
-local storage:
+local storage (no cookies):
 
 ```
 "token":"eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MzYyMjU5NDUsImV4cCI6MTUzNjMxMjM0NSwic3ViIjoiMzdjMDY2ZjgtNDhjMS00NDZjLTk4OGQtYzQ0ZDQ4MDJiNzZmIiwicm9sZXMiOlsiYWRtaW4iXX0.UwqjX27pGJHJoGjCMkLhBnwoszb9d590upnkRFM0LaA"}
+```
+
+The above token [https://jwt.io/](decodes) to:
+
+```
+{
+  "alg": "HS256"
+  "iat": 1536225945,
+  "exp": 1536312345,
+  "sub": "37c066f8-48c1-446c-988d-c44d4802b76f",
+  "roles": [
+    "admin"
+  ]
+}
 ```
 
 Whenever the user wants to access a protected route or resource, the user agent should send the JWT in the Authorization header using the Bearer schema: 
